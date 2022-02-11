@@ -23,6 +23,9 @@ import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL14.GL_TEXTURE_LOD_BIAS;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
+/**
+ * All types of blocks
+ */
 enum BlockType {
     NONE,
     STONE,
@@ -81,44 +84,7 @@ public class Block {
      */
     public static void loadVAO() {
         vaos = new HashMap<>();
-//        float[] vertices = new float[] {
-//                0.0f,0.0f,0.0f,
-//                0.0f,0.0f, 1.0f,
-//                0.0f, 1.0f, 1.0f,
-//                1.0f, 1.0f,0.0f,
-//                0.0f,0.0f,0.0f,
-//                0.0f, 1.0f,0.0f,
-//                1.0f,0.0f, 1.0f,
-//                0.0f,0.0f,0.0f,
-//                1.0f,0.0f,0.0f,
-//                1.0f, 1.0f,0.0f,
-//                1.0f,0.0f,0.0f,
-//                0.0f,0.0f,0.0f,
-//                0.0f,0.0f,0.0f,
-//                0.0f, 1.0f, 1.0f,
-//                0.0f, 1.0f,0.0f,
-//                1.0f,0.0f, 1.0f,
-//                0.0f,0.0f, 1.0f,
-//                0.0f,0.0f,0.0f,
-//                0.0f, 1.0f, 1.0f,
-//                0.0f,0.0f, 1.0f,
-//                1.0f,0.0f, 1.0f,
-//                1.0f, 1.0f, 1.0f,
-//                1.0f,0.0f,0.0f,
-//                1.0f, 1.0f,0.0f,
-//                1.0f,0.0f,0.0f,
-//                1.0f, 1.0f, 1.0f,
-//                1.0f,0.0f, 1.0f,
-//                1.0f, 1.0f, 1.0f,
-//                1.0f, 1.0f,0.0f,
-//                0.0f, 1.0f,0.0f,
-//                1.0f, 1.0f, 1.0f,
-//                0.0f, 1.0f,0.0f,
-//                0.0f, 1.0f, 1.0f,
-//                1.0f, 1.0f, 1.0f,
-//                0.0f, 1.0f, 1.0f,
-//                1.0f,0.0f, 1.0f
-//        };
+        // Vertices of a cube
         float[] vertices = new float[]{
             0, 0, 0,    1, 0, 0,    1, 1, 0, // -z face
             1, 1, 0,    0, 1, 0,    0, 0, 0,
@@ -135,6 +101,7 @@ public class Block {
         };
         vertexCount = vertices.length;
 
+        // Load each block type into gpu memory seperately (they have different texture coords :(  )
         for (BlockType type : BlockType.values()) {
             vaos.put(type, GL30.glGenVertexArrays());
             int vao = vaos.get(type);
@@ -153,11 +120,14 @@ public class Block {
             // This vbo will be at index 0 of the earlier vao
             GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 0, 0);
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+
             // Also store texture coords for all vertices
             float inc = (float) increment / (float) size;
+            // Find the texture coord of the left top of the sprite of this block type
             Vector2f leftTop = new Vector2f(inc * textureLocation.get(type).x, inc * textureLocation.get(type).y);
             float[] textureCoords = new float[vertices.length];
             Vector2f coords = new Vector2f(0);
+            // Create an array of texture coords based on how we draw triangles into a cube
             for (int i = 0; i < 36; i++) {
                 int o = i % 6;
                 if (o == 0 || o == 4 || o == 5) {
@@ -173,6 +143,7 @@ public class Block {
                 textureCoords[2 * i] = coords.x;
                 textureCoords[2 * i + 1] = coords.y;
             }
+            // Load the texture coords array into gpu memory
             vbo = GL15.glGenBuffers();
             // Bind it, so that we perform edits on this vbo
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
@@ -189,6 +160,9 @@ public class Block {
         }
     }
 
+    /**
+     * Load the 2^k*2^k texture png into gpu memory
+     */
     public static void loadTexture() {
         // Intialize array of pixel properties
         int[] pixels = null;

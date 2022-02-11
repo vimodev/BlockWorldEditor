@@ -82,6 +82,7 @@ public class App {
         // Make a world instance with some blocks
         World world = new World(this);
 
+        // Generate some blocks of all types
         float offset = 0;
         for (BlockType type : BlockType.values()) {
             for (int i = 0; i < 1000; i++) {

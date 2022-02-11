@@ -15,6 +15,7 @@ public class World {
 
     public Camera camera;
 
+    // List of blocks for each block type
     public Map<BlockType, List<Block>> blocks;
 
     public Vector3f skyColor;
@@ -27,6 +28,7 @@ public class World {
         skyColor = new Vector3f(0, 0.6f, 1f);
     }
 
+    // Add a block to its type list
     public void addBlock(Block block) {
         blocks.get(block.type).add(block);
     }

@@ -41,10 +41,13 @@ public class Renderer {
 
         // For every block in the world, set its properties and draw
         for (BlockType type : BlockType.values()) {
+            // Bind properties
             GL30.glBindVertexArray(Block.vaos.get(type));
             GL20.glEnableVertexAttribArray(0);
             GL20.glEnableVertexAttribArray(1);
+            // Draw every block of this type
             for (Block block : world.blocks.get(type)) {
+                // If in render distance
                 if (world.camera.position.distance(block.position) > RENDER_DISTANCE) continue;
                 shader.setUniform("transformationMatrix", block.getTransformationMatrix());
                 GL11.glDrawArrays(GL_TRIANGLES, 0, Block.vertexCount);

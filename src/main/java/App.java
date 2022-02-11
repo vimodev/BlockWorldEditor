@@ -12,12 +12,12 @@ import static org.lwjgl.opengl.GL11.glClearColor;
  */
 public class App {
 
-    private Window window;
-    private int WINDOW_WIDTH = 1920;
-    private int WINDOW_HEIGHT = 1080;
-    private String WINDOW_TITLE = "BlockWorldEditor";
+    public Window window;
+    public int WINDOW_WIDTH = 1920;
+    public int WINDOW_HEIGHT = 1080;
+    public String WINDOW_TITLE = "BlockWorldEditor";
 
-    private Timer fps;
+    public Timer fps;
 
     /**
      * Run the application
@@ -65,6 +65,8 @@ public class App {
         // Set the background clear color
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
+        // Initialize input controller
+        InputController.initialize(this);
         // Intitialize fps timer
         fps = new Timer();
         // Load Block model
@@ -76,14 +78,10 @@ public class App {
      */
     public void loop() {
 
-        World world = new World();
-        world.blocks.add(new Block(-0.25f, -0.25f, 0f));
-//        for (int x = -50; x < 10; x++) {
-//            world.blocks.add(new Block(x, -1, 0));
-//        }
-//        for (int z = -50; z < 50; z++) {
-//            world.blocks.add(new Block(0, -1, z));
-//        }
+        World world = new World(this);
+        world.blocks.add(new Block(0f, 0f, 0f));
+
+        world.blocks.add(new Block(2f, 0f, 0f));
 
         double accumulatedTime = 0;
         while ( !glfwWindowShouldClose(window.getWindow()) ) {

@@ -86,18 +86,18 @@ public class Block {
         vaos = new HashMap<>();
         // Vertices of a cube
         float[] vertices = new float[]{
-            0, 0, 0,    1, 0, 0,    1, 1, 0, // -z face
-            1, 1, 0,    0, 1, 0,    0, 0, 0,
-            1, 0, 0,    1, 0, 1,    1, 1, 1, // +x face
-            1, 1, 1,    1, 1, 0,    1, 0, 0,
-            1, 0, 1,    0, 0, 1,    0, 1, 1, // +z face
-            0, 1, 1,    1, 1, 1,    1, 0, 1,
-            0, 0, 1,    0, 0, 0,    0, 1, 0, // -x face
-            0, 1, 0,    0, 1, 1,    0, 0, 1,
-            0, 1, 0,    1, 1, 0,    1, 1, 1, // Top face
-            1, 1, 1,    0, 1, 1,    0, 1, 0,
-            1, 0, 1,    1, 0, 0,    0, 0, 0, // Bottom face
-            0erm, 0, 0,    0, 0, 1,    1, 0, 1
+            1, 1, 0,    1, 0, 0,    0, 0, 0, // -z face
+            0, 0, 0,    0, 1, 0,    1, 1, 0,
+            1, 1, 1,    1, 0, 1,    1, 0, 0, // +x face
+            1, 0, 0,    1, 1, 0,    1, 1, 1,
+            0, 1, 1,    0, 0, 1,    1, 0, 1, // +z face
+            1, 0, 1,    1, 1, 1,    0, 1, 1,
+            0, 1, 0,    0, 0, 0,    0, 0, 1, // -x face
+            0, 0, 1,    0, 1, 1,    0, 1, 0,
+            1, 1, 1,    1, 1, 0,    0, 1, 0, // Top face
+            0, 1, 0,    0, 1, 1,    1, 1, 1,
+            0, 0, 0,    1, 0, 0,    1, 0, 1, // Bottom face
+            1, 0, 1,    0, 0, 1,    0, 0, 0
         };
         float[] normals = new float[]{
             0, 0, -1,   0, 0, -1,   0, 0, -1, // -z
@@ -146,12 +146,12 @@ public class Block {
             // Create an array of texture coords based on how we draw triangles into a cube
             for (int i = 0; i < 36; i++) {
                 int o = i % 6;
-                if (o == 0 || o == 4 || o == 5) {
+                if (o == 2 || o == 3 || o == 4) {
                     coords.x = leftTop.x;
                 } else {
                     coords.x = leftTop.x + inc;
                 }
-                if (o == 0 || o == 1 || o == 5) {
+                if (o == 1 || o == 2 || o == 3) {
                     coords.y = leftTop.y + inc;
                 } else {
                     coords.y = leftTop.y;

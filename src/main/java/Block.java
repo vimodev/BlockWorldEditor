@@ -96,13 +96,29 @@ public class Block {
             0, 1, 0,    0, 1, 1,    0, 0, 1,
             0, 1, 0,    1, 1, 0,    1, 1, 1, // Top face
             1, 1, 1,    0, 1, 1,    0, 1, 0,
-            0, 0, 0,    1, 0, 0,    1, 0, 1, // Bottom face
-            1, 0, 1,    0, 0, 1,    0, 0, 0
+            1, 0, 1,    1, 0, 0,    0, 0, 0, // Bottom face
+            0erm, 0, 0,    0, 0, 1,    1, 0, 1
+        };
+        float[] normals = new float[]{
+            0, 0, -1,   0, 0, -1,   0, 0, -1, // -z
+                0, 0, -1,   0, 0, -1,   0, 0, -1,
+                1, 0, 0,    1, 0, 0,    1, 0, 0, // +x
+                1, 0, 0,    1, 0, 0,    1, 0, 0,
+                0, 0, 1,    0, 0, 1,    0, 0, 1, // +z
+                0, 0, 1,    0, 0, 1,    0, 0, 1,
+                -1, 0, 0,   -1, 0, 0,   -1, 0, 0, // -x
+                -1, 0, 0,   -1, 0, 0,   -1, 0, 0,
+                0, 1, 0,    0, 1, 0,    0, 1, 0, // Top
+                0, 1, 0,    0, 1, 0,    0, 1, 0,
+                0, -1, 0,   0, -1, 0,   0, -1, 0, // Bottom
+                0, -1, 0,   0, -1, 0,   0, -1, 0,
         };
         vertexCount = vertices.length;
 
         // Load each block type into gpu memory seperately (they have different texture coords :(  )
         for (BlockType type : BlockType.values()) {
+
+            // Vertices
             vaos.put(type, GL30.glGenVertexArrays());
             int vao = vaos.get(type);
             // Bind it, so that we perform edits on this vao
@@ -121,7 +137,7 @@ public class Block {
             GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 0, 0);
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 
-            // Also store texture coords for all vertices
+            // Texture coords
             float inc = (float) increment / (float) size;
             // Find the texture coord of the left top of the sprite of this block type
             Vector2f leftTop = new Vector2f(inc * textureLocation.get(type).x, inc * textureLocation.get(type).y);
@@ -156,6 +172,21 @@ public class Block {
             // This vbo will be at index 0 of the earlier vao
             GL20.glVertexAttribPointer(1, 2, GL11.GL_FLOAT, false, 0, 0);
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+
+            // Normals
+            vbo = GL15.glGenBuffers();
+            // Bind it, so that we perform edits on this vbo
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
+            // Put the vertex data into a read-ready buffer
+            buffer = BufferUtils.createFloatBuffer(normals.length);
+            buffer.put(normals);
+            buffer.flip();
+            // Pipe the vertex data into the bound vbo
+            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
+            // This vbo will be at index 0 of the earlier vao
+            GL20.glVertexAttribPointer(2, 3, GL11.GL_FLOAT, false, 0, 0);
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+
             GL30.glBindVertexArray(0);
         }
     }

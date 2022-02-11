@@ -17,10 +17,11 @@ public class Renderer {
         // Enable depth testing
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_LEQUAL);
+//        glFrontFace(GL_CW);
         // Enable backface culling
-//        glEnable(GL_CULL_FACE);
+        glEnable(GL_CULL_FACE);
 //        GL11.glEnable(GL11.GL_BLEND);
-//        glCullFace(GL_BACK);
+        glCullFace(GL_BACK);
         // Set clear color to sky color and clear
         GL11.glClearColor(world.skyColor.x, world.skyColor.y, world.skyColor.z, 1);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -43,8 +44,9 @@ public class Renderer {
         for (BlockType type : BlockType.values()) {
             // Bind properties
             GL30.glBindVertexArray(Block.vaos.get(type));
-            GL20.glEnableVertexAttribArray(0);
-            GL20.glEnableVertexAttribArray(1);
+            GL20.glEnableVertexAttribArray(0); // Vertices
+            GL20.glEnableVertexAttribArray(1); // Texture coords
+            GL20.glEnableVertexAttribArray(2); // Normals
             // Draw every block of this type
             for (Block block : world.blocks.get(type)) {
                 // If in render distance

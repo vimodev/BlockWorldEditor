@@ -11,6 +11,8 @@ public class Renderer {
 
     public static Shader defaultShader = new DefaultShader();
 
+    public static float RENDER_DISTANCE = 100f;
+
     public static void render(World world) {
         // Enable depth testing
         glEnable(GL_DEPTH_TEST);
@@ -43,6 +45,7 @@ public class Renderer {
             GL20.glEnableVertexAttribArray(0);
             GL20.glEnableVertexAttribArray(1);
             for (Block block : world.blocks.get(type)) {
+                if (world.camera.position.distance(block.position) > RENDER_DISTANCE) continue;
                 shader.setUniform("transformationMatrix", block.getTransformationMatrix());
                 GL11.glDrawArrays(GL_TRIANGLES, 0, Block.vertexCount);
             }

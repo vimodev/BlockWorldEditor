@@ -81,12 +81,12 @@ public class App {
 
         // Make a world instance with some blocks
         World world = new World(this);
-//        world.blocks.add(new Block(0f, 0f, 0f, BlockType.STONE));
-//        world.blocks.add(new Block(2f, 0f, 0f, BlockType.NONE));
 
         float offset = 0;
         for (BlockType type : BlockType.values()) {
-            world.blocks.add(new Block(offset, 0f, 0f, type));
+            for (int i = 0; i < 10; i++) {
+                world.blocks.add(new Block(offset, 0f, i * -2.0f, type));
+            }
             offset += 2.0f;
         }
 

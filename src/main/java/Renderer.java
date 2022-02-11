@@ -38,12 +38,14 @@ public class Renderer {
         GL11.glBindTexture(GL_TEXTURE_2D, Block.texture);
 
         // For every block in the world, set its properties and draw
-        for (Block block : world.blocks) {
-            GL30.glBindVertexArray(Block.vaos.get(block.type));
+        for (BlockType type : BlockType.values()) {
+            GL30.glBindVertexArray(Block.vaos.get(type));
             GL20.glEnableVertexAttribArray(0);
             GL20.glEnableVertexAttribArray(1);
-            shader.setUniform("transformationMatrix", block.getTransformationMatrix());
-            GL11.glDrawArrays(GL_TRIANGLES, 0, Block.vertexCount);
+            for (Block block : world.blocks.get(type)) {
+                shader.setUniform("transformationMatrix", block.getTransformationMatrix());
+                GL11.glDrawArrays(GL_TRIANGLES, 0, Block.vertexCount);
+            }
         }
 
         // Unbind everything for safety

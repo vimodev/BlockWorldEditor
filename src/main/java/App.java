@@ -85,7 +85,7 @@ public class App {
         float offset = 0;
         for (BlockType type : BlockType.values()) {
             for (int i = 0; i < 10; i++) {
-                world.blocks.add(new Block(offset, 0f, i * -2.0f, type));
+                world.addBlock(new Block(offset, 0f, i * -2.0f, type));
             }
             offset += 2.0f;
         }

@@ -67,6 +67,8 @@ public class App {
 
         // Intitialize fps timer
         fps = new Timer();
+        // Load Block model
+        Block.loadVAO();
     }
 
     /**
@@ -74,10 +76,22 @@ public class App {
      */
     public void loop() {
 
+        World world = new World();
+        world.blocks.add(new Block(-0.25f, -0.25f, 0f));
+//        for (int x = -50; x < 10; x++) {
+//            world.blocks.add(new Block(x, -1, 0));
+//        }
+//        for (int z = -50; z < 50; z++) {
+//            world.blocks.add(new Block(0, -1, z));
+//        }
+
         double accumulatedTime = 0;
         while ( !glfwWindowShouldClose(window.getWindow()) ) {
             double dt = fps.dt();
             accumulatedTime += dt;
+
+            world.applyInput(dt);
+            world.render();
 
             if (accumulatedTime > 1) {
                 accumulatedTime -= 1;

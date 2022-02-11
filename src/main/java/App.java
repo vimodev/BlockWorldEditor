@@ -69,8 +69,9 @@ public class App {
         InputController.initialize(this);
         // Intitialize fps timer
         fps = new Timer();
-        // Load Block model
+        // Load Block model and texture
         Block.loadVAO();
+        Block.loadTexture();
     }
 
     /**
@@ -80,8 +81,8 @@ public class App {
 
         // Make a world instance with some blocks
         World world = new World(this);
-        world.blocks.add(new Block(0f, 0f, 0f));
-        world.blocks.add(new Block(2f, 0f, 0f));
+        world.blocks.add(new Block(0f, 0f, 0f, BlockType.STONE));
+        world.blocks.add(new Block(2f, 0f, 0f, BlockType.NONE));
 
         // Main game loop
         double accumulatedTime = 0;

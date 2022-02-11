@@ -21,6 +21,7 @@ public class Camera {
     private float yaw = 0;
     private float roll = 0;
 
+    // Is the mouse currently held
     private boolean mouseLocked = false;
 
     /**

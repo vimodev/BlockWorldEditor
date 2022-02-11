@@ -78,23 +78,29 @@ public class App {
      */
     public void loop() {
 
+        // Make a world instance with some blocks
         World world = new World(this);
         world.blocks.add(new Block(0f, 0f, 0f));
-
         world.blocks.add(new Block(2f, 0f, 0f));
 
+        // Main game loop
         double accumulatedTime = 0;
         while ( !glfwWindowShouldClose(window.getWindow()) ) {
+            // Get time delta
             double dt = fps.dt();
             accumulatedTime += dt;
 
+            // Apply input to the world
             world.applyInput(dt);
+            // Render the world
             world.render();
 
+            // Every second edit window title to show fps
             if (accumulatedTime > 1) {
                 accumulatedTime -= 1;
                 window.setTitle(WINDOW_TITLE + " " + String.format("%.2f", fps.getFrequency()) + " fps");
             }
+            // Frame is ready
             glfwSwapBuffers(window.getWindow());
             glfwPollEvents();
         }

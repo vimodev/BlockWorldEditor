@@ -3,8 +3,12 @@ import org.joml.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Generic container for anything that a block world might contain
+ */
 public class World {
 
+    // App reference for global access
     private App app;
 
     public Camera camera;
@@ -20,8 +24,6 @@ public class World {
 
     public void applyInput(double dt) {
         camera.freeMove(app, dt);
-//        camera.position.z -= 1.0 * dt;
-//        blocks.get(0).position.z -= 0.1 * dt;
     }
 
     public void render() {

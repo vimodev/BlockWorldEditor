@@ -10,8 +10,8 @@ import static org.lwjgl.glfw.GLFW.*;
  */
 public class InputController {
 
-    protected static final double KEY_BOUNCE_TIME = 0.1f;
-    protected static Map<Integer, Timer> keyTimers;
+    protected static final double KEY_BOUNCE_TIME = 0.1f; // in seconds
+    protected static Map<Integer, Timer> keyTimers; // indexed by key code
     protected static App app;
 
     /**

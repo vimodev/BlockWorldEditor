@@ -17,6 +17,8 @@ public class App {
     private int WINDOW_HEIGHT = 1080;
     private String WINDOW_TITLE = "BlockWorldEditor";
 
+    private Timer fps;
+
     /**
      * Run the application
      */
@@ -62,6 +64,9 @@ public class App {
         GL.createCapabilities();
         // Set the background clear color
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+        // Intitialize fps timer
+        fps = new Timer();
     }
 
     /**
@@ -69,7 +74,15 @@ public class App {
      */
     public void loop() {
 
+        double accumulatedTime = 0;
         while ( !glfwWindowShouldClose(window.getWindow()) ) {
+            double dt = fps.dt();
+            accumulatedTime += dt;
+
+            if (accumulatedTime > 1) {
+                accumulatedTime -= 1;
+                window.setTitle(WINDOW_TITLE + " " + String.format("%.2f", fps.getFrequency()) + " fps");
+            }
             glfwSwapBuffers(window.getWindow());
             glfwPollEvents();
         }

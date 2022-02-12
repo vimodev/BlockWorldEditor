@@ -36,6 +36,9 @@ public class Renderer {
         shader.setUniform("projectionMatrix", world.camera.getProjection());
         shader.setUniform("viewMatrix", world.camera.getTransformation());
 
+        // Set view/camera position
+        shader.setUniform("viewPosition", world.camera.position);
+
         // Enable the block texture
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         GL11.glBindTexture(GL_TEXTURE_2D, Block.texture);

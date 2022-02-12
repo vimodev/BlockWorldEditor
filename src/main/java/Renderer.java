@@ -1,3 +1,4 @@
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -41,7 +42,7 @@ public class Renderer {
 
         // Render each chunk's mesh
         for (Chunk c : world.chunks) {
-            if (world.camera.position.distance(new Vector3f(c.origin.x, c.origin.y, c.origin.z)) > RENDER_DISTANCE) continue;
+            if (new Vector2f(world.camera.position.x, world.camera.position.z).distance(new Vector2f(c.origin.x, c.origin.z)) > RENDER_DISTANCE) continue;
             shader.setUniform("transformationMatrix", c.getTransformationMatrix());
             GL30.glBindVertexArray(c.mesh);
             GL20.glEnableVertexAttribArray(0); // Vertices

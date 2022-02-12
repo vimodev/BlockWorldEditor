@@ -12,11 +12,10 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
  */
 public class Camera {
 
-    // Position of the camera
+    // Properties of the camera
     public Vector3f position = new Vector3f(0, 10, 3);
-
-    // Current upwards velocity
     private float upwardsVelocity = 0f;
+    private boolean isAirborne = true;
 
     // Projection properties of the camera
     private Matrix4f projection = new Matrix4f();
@@ -35,8 +34,7 @@ public class Camera {
     private float gravity = -50;
     private float jumpStrength = 20;
 
-    // Is the mouse currently held
-    private boolean mouseLocked = false;
+
 
     /**
      * Create a new camera
@@ -116,7 +114,7 @@ public class Camera {
 
         translate(direction.mul(mv_scl_forward * movementSpeed * (float) dt));
         translate(right.mul(mv_scl_rightward * strafeSpeed * (float) dt));
-        if(jump == 1) {
+        if(jump == 1 && !isAirborne) {
             upwardsVelocity = jumpStrength;
         }
         translate(up.mul(upwardsVelocity * (float) dt));
@@ -124,6 +122,7 @@ public class Camera {
 
         // Hard-code collision at y=4
         position.y = Math.max(position.y, 4f);
+        isAirborne = position.y != 4f;
     }
 
     /**

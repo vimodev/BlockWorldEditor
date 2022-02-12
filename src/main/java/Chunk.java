@@ -46,6 +46,43 @@ public class Chunk {
         return M;
     }
 
+    public Block removeBlock(int x, int y, int z) {
+        Block block = blocks[x][z][y];
+        if (block == null) return null;
+        if (block == first && block == last) {
+            first = null; last = null;
+        } else if (block == first) {
+            first = block.next;
+            block.next.previous = null;
+        } else if (block == last) {
+            last = block.previous;
+            block.previous.next = null;
+        } else {
+            block.next.previous = block.previous;
+            block.previous.next = block.next;
+        }
+        blocks[x][z][y] = null;
+        if (x - 1 >= 0 && blocks[x-1][z][y] != null) {
+            blocks[x-1][z][y].faces[1] = true;
+        }
+        if (x + 1 < Chunk.WIDTH && blocks[x+1][z][y] != null) {
+            blocks[x + 1][z][y].faces[3] = true;
+        }
+        if (z - 1 >= 0 && blocks[x][z-1][y] != null) {
+            blocks[x][z-1][y].faces[2] = true;
+        }
+        if (z + 1 < Chunk.WIDTH && blocks[x][z+1][y] != null) {
+            blocks[x][z+1][y].faces[0] = true;
+        }
+        if (y - 1 >= 0 && blocks[x][z][y-1] != null) {
+            blocks[x][z][y-1].faces[4] = true;
+        }
+        if (y + 1 < Chunk.HEIGHT && blocks[x][z][y+1] != null) {
+            blocks[x][z][y+1].faces[5] = true;
+        }
+        return block;
+    }
+
     /**
      * Set the block at local coords x y z to Block
      * @param x
@@ -66,12 +103,12 @@ public class Chunk {
             blocks[x + 1][z][y].faces[3] = false;
         }
         if (z - 1 >= 0 && blocks[x][z-1][y] != null) {
-            block.faces[2] = false;
-            blocks[x][z-1][y].faces[0] = false;
+            block.faces[0] = false;
+            blocks[x][z-1][y].faces[2] = false;
         }
         if (z + 1 < Chunk.WIDTH && blocks[x][z+1][y] != null) {
-            block.faces[0] = false;
-            blocks[x][z+1][y].faces[2] = false;
+            block.faces[2] = false;
+            blocks[x][z+1][y].faces[0] = false;
         }
         if (y - 1 >= 0 && blocks[x][z][y-1] != null) {
             block.faces[5] = false;

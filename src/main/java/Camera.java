@@ -23,9 +23,9 @@ public class Camera {
 
     // Settings
     private float mouseSensitivity = 0.2f;
-    private float movementSpeed = 10f;
-    private float strafeSpeed = 7f;
-    private float verticalSpeed = 5f;
+    private float movementSpeed = 25f;
+    private float strafeSpeed = 25f;
+    private float verticalSpeed = 25f;
     private float fieldOfView = 70f;
 
 

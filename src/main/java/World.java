@@ -15,9 +15,6 @@ public class World {
 
     public Camera camera;
 
-    // List of blocks for each block type
-    public Map<BlockType, List<Block>> blocks;
-
     public List<Chunk> chunks;
 
     public Vector3f skyColor;
@@ -25,8 +22,6 @@ public class World {
     public World(App app) {
         this.app = app;
         camera = new Camera();
-        blocks = new HashMap<>();
-        for (BlockType type : BlockType.values()) blocks.put(type, new ArrayList<>());
         skyColor = new Vector3f(0, 0.6f, 1f);
         chunks = new ArrayList<>();
     }
@@ -46,7 +41,6 @@ public class World {
 
     // Add a block to its type list
     public void addBlock(Block block) {
-        blocks.get(block.type).add(block);
         Chunk chunk = getChunkFromPosition(block.position);
         int x = (int) block.position.x % Chunk.WIDTH;
         int y = (int) block.position.y % Chunk.HEIGHT;

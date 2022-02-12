@@ -13,7 +13,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
 public class Camera {
 
     // Position of the camera
-    public Vector3f position = new Vector3f(0, 0, 3);
+    public Vector3f position = new Vector3f(0, 10, 3);
     // Projection properties of the camera
     private Matrix4f projection = new Matrix4f();
     // Orientation properties
@@ -26,7 +26,7 @@ public class Camera {
     private float movementSpeed = 10f;
     private float strafeSpeed = 7f;
     private float verticalSpeed = 5f;
-    private float fieldOfView = 80f;
+    private float fieldOfView = 70f;
 
 
     // Is the mouse currently held

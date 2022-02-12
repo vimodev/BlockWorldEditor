@@ -43,6 +43,14 @@ public class Renderer {
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         GL11.glBindTexture(GL_TEXTURE_2D, Block.texture);
 
+        // Add directional light from world
+        world.dirLight.addToShaderAsDirLight(shader);
+
+        // Add point lights from world
+        for (int i = 0; i < world.pointLights.size(); i++) {
+            world.pointLights.get(i).addToShaderAsPointLight(shader, i);
+        }
+
         // Render each chunk's mesh
         for (Chunk c : world.chunks) {
             if (new Vector2f(world.camera.position.x, world.camera.position.z).distance(new Vector2f(c.origin.x, c.origin.z)) > RENDER_DISTANCE) continue;

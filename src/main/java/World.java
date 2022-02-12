@@ -19,11 +19,44 @@ public class World {
 
     public Vector3f skyColor;
 
+    // Directional light (e.g. the sun)
+    public Light dirLight = new Light(
+            new Vector3f(0f,-1f,0f),
+            new Vector3f(0.3f, 0.25f, 0.25f),
+            new Vector3f(0.2f, 0.15f, 0.15f),
+            new Vector3f(0.1f, 0.1f, 0.1f)
+    );
+    // All point lights (e.g. light blocks, torches)
+    public List<Light> pointLights = new ArrayList<Light>();
+
     public World(App app) {
         this.app = app;
         camera = new Camera();
-        skyColor = new Vector3f(0, 0.6f, 1f);
+        skyColor = new Vector3f(0.2f, 0.6f, 0.8f);
         chunks = new ArrayList<>();
+
+        pointLights.add(new Light(
+                new Vector3f(0f, 2f, 3f),
+                new Vector3f(0.1f, 0.1f, 0.5f),
+                new Vector3f(0.1f, 0.1f, 0.4f),
+                new Vector3f(0.1f, 0.1f, 0.3f)
+        ));
+
+        pointLights.add(new Light(
+                new Vector3f(5f, 2f, 3f),
+                new Vector3f(0.5f, 0.1f, 0.1f),
+                new Vector3f(0.4f, 0.1f, 0.1f),
+                new Vector3f(0.3f, 0.1f, 0.1f)
+                ));
+
+        pointLights.add(new Light(
+                new Vector3f(10f, 2f, 3f),
+                new Vector3f(0.1f, 0.5f, 0.1f),
+                new Vector3f(0.1f, 0.4f, 0.1f),
+                new Vector3f(0.1f, 0.3f, 0.1f)
+        ));
+
+
     }
 
     private Chunk getChunkFromPosition(Vector3f position) {

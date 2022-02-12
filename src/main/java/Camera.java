@@ -13,13 +13,21 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
 public class Camera {
 
     // Position of the camera
-    public Vector3f position;
+    public Vector3f position = new Vector3f(0, 0, 3);
     // Projection properties of the camera
-    private Matrix4f projection;
+    private Matrix4f projection = new Matrix4f();
     // Orientation properties
     private float pitch = 0;
     private float yaw = 0;
     private float roll = 0;
+
+    // Settings
+    private float mouseSensitivity = 0.2f;
+    private float movementSpeed = 10f;
+    private float strafeSpeed = 7f;
+    private float verticalSpeed = 5f;
+    private float fieldOfView = 80f;
+
 
     // Is the mouse currently held
     private boolean mouseLocked = false;
@@ -28,9 +36,7 @@ public class Camera {
      * Create a new camera
      */
     public Camera() {
-        position = new Vector3f(2, 0, 5);
-        projection = new Matrix4f();
-        setProjection(1920.0f / 1080.0f, 70, 0.1f, 1000f);
+        setProjection(1920.0f / 1080.0f, fieldOfView, 0.1f, 1000f);
     }
 
     /**
@@ -38,33 +44,35 @@ public class Camera {
      * @param dt
      */
     public void freeMove(App app, double dt) {
-        // Mouse looking
-        if (!mouseLocked && InputController.primaryMouseButtonHeld()) {
-            glfwSetCursorPos(app.window.getWindow(), app.WINDOW_WIDTH / 2, app.WINDOW_HEIGHT / 2);
-            mouseLocked = true;
-        } else if (mouseLocked) {
-            DoubleBuffer x = BufferUtils.createDoubleBuffer(1);
-            DoubleBuffer y = BufferUtils.createDoubleBuffer(1);
-            glfwGetCursorPos(app.window.getWindow(), x, y);
-            x.rewind();
-            y.rewind();
-            double newX = x.get();
-            double newY = y.get();
-            double deltaX = newX - app.WINDOW_WIDTH / 2;
-            double deltaY = newY - app.WINDOW_HEIGHT / 2;
-            //System.out.println("Delta X = " + deltaX + " Delta Y = " + deltaY);
-            glfwSetCursorPos(app.window.getWindow(), app.WINDOW_WIDTH / 2, app.WINDOW_HEIGHT / 2);
-            pitch((float) deltaY * 0.2f);
-            yaw((float) deltaX * 0.2f);
-            pitch = Math.max(pitch, -90f); pitch = Math.min(pitch, 90f);
-        }
-        if (!InputController.primaryMouseButtonHeld()) {
-            mouseLocked = false;
-        }
+        // Use delta of mouse to move camera
+        DoubleBuffer x = BufferUtils.createDoubleBuffer(1);
+        DoubleBuffer y = BufferUtils.createDoubleBuffer(1);
+        glfwGetCursorPos(app.window.getWindow(), x, y);
+        x.rewind();
+        y.rewind();
+        double newX = x.get();
+        double newY = y.get();
+        double deltaX = newX - app.WINDOW_WIDTH / 2;
+        double deltaY = newY - app.WINDOW_HEIGHT / 2;
+
+        glfwSetCursorPos(app.window.getWindow(), app.WINDOW_WIDTH / 2, app.WINDOW_HEIGHT / 2);
+
+        yaw((float) deltaX * mouseSensitivity);
+        pitch((float) deltaY * mouseSensitivity);
+
         // Keyboard movement
         float mv_scl_forward = InputController.keyHeldInt(GLFW_KEY_W) - InputController.keyHeldInt(GLFW_KEY_S);
+        float mv_Scl_upward = InputController.keyHeldInt(GLFW_KEY_SPACE) - InputController.keyHeldInt(GLFW_KEY_LEFT_SHIFT);
+        float mv_scl_rightward = InputController.keyHeldInt(GLFW_KEY_D) - InputController.keyHeldInt(GLFW_KEY_A);
+
         Vector3f direction = getDirection();
-        translate(direction.mul(mv_scl_forward * 10f * (float) dt));
+        Vector3f up = new Vector3f(0.0f, 1.0f, 0.0f);
+        Vector3f right = new Vector3f(direction);
+        right.cross(up);
+
+        translate(direction.mul(mv_scl_forward * movementSpeed * (float) dt));
+        translate(up.mul(mv_Scl_upward * strafeSpeed * (float) dt));
+        translate(right.mul(mv_scl_rightward * verticalSpeed * (float) dt));
     }
 
     /**
@@ -92,11 +100,16 @@ public class Camera {
      * @return
      */
     public Vector3f getDirection() {
+        double yawRad = Math.toRadians(yaw-90f);
+        double pitchRad = Math.toRadians(-pitch);
+
+
+
         // Apply transformations
-        Vector3f dir = new Vector3f(0, 0, -1);
-        dir.rotateX((float) Math.toRadians(-pitch));
-        dir.rotateY((float) Math.toRadians(-yaw));
-        dir.rotateZ((float) Math.toRadians(roll));
+        Vector3f dir = new Vector3f(
+                (float) (Math.cos(yawRad) * Math.cos(pitchRad)),
+                (float) Math.sin(pitchRad),
+                (float) (Math.sin(yawRad) * Math.cos(pitchRad))).normalize();
         return dir;
     }
 

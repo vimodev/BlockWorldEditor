@@ -18,6 +18,8 @@ public class World {
     // List of blocks for each block type
     public Map<BlockType, List<Block>> blocks;
 
+    public List<Chunk> chunks;
+
     public Vector3f skyColor;
 
     public World(App app) {
@@ -26,11 +28,32 @@ public class World {
         blocks = new HashMap<>();
         for (BlockType type : BlockType.values()) blocks.put(type, new ArrayList<>());
         skyColor = new Vector3f(0, 0.6f, 1f);
+        chunks = new ArrayList<>();
+    }
+
+    private Chunk getChunkFromPosition(Vector3f position) {
+        int floorX = (int) Math.floor(position.x / Chunk.WIDTH) * Chunk.WIDTH;
+        int floorZ = (int) Math.floor(position.z / Chunk.WIDTH) * Chunk.WIDTH;
+        for (Chunk chunk : chunks) {
+            if (chunk.origin.x == floorX && chunk.origin.z == floorZ) {
+                return chunk;
+            }
+        }
+        Chunk chunk = new Chunk(floorX, 0, floorZ);
+        chunks.add(chunk);
+        return chunk;
     }
 
     // Add a block to its type list
     public void addBlock(Block block) {
         blocks.get(block.type).add(block);
+        Chunk chunk = getChunkFromPosition(block.position);
+        int x = (int) block.position.x % Chunk.WIDTH;
+        int y = (int) block.position.y % Chunk.HEIGHT;
+        int z = (int) block.position.z % Chunk.WIDTH;
+        if (x < 0) x += Chunk.WIDTH;
+        if (z < 0) z += Chunk.WIDTH;
+        chunk.setBlock(x, y, z, block);
     }
 
     public void applyInput(double dt) {

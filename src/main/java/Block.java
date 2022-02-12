@@ -1,7 +1,4 @@
-import org.joml.Matrix4f;
-import org.joml.Vector2f;
-import org.joml.Vector2i;
-import org.joml.Vector3f;
+import org.joml.*;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
@@ -21,6 +18,7 @@ import java.util.Map;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL14.GL_TEXTURE_LOD_BIAS;
+import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 /**
@@ -40,10 +38,7 @@ enum BlockType {
  */
 public class Block {
 
-    // Pointer to the block mesh in gpu memory, needed for rendering
-    static int vao = -1;
-    static Map<BlockType, Integer> vaos = null;
-    static int vertexCount = -1;
+    static Map<BlockType, Integer[]> vao;
 
     // Texture stuff
     static final String textureFile = "textures.png";
@@ -60,12 +55,20 @@ public class Block {
             BlockType.COBBLE, new Vector2i(0, 1)
     );
 
-    Vector3f position;
-    BlockType type;
+    public Vector3f position;
+    public BlockType type;
+
+    // Chunk stuff
+    public boolean[] faces;
+    public Block previous;
+    public Block next;
+    public Vector3i positionInChunk;
 
     public Block(float x, float y, float z, BlockType type) {
         this.position = new Vector3f(x, y, z);
         this.type = type;
+        this.faces = new boolean[6];
+        for (int f = 0; f < 6; f++) this.faces[f] = true;
     }
 
     /**
@@ -79,115 +82,95 @@ public class Block {
         return M;
     }
 
+    static float[][] faceVertices = new float[][]{
+            {1, 1, 0,    1, 0, 0,    0, 0, 0, // -z face
+                    0, 0, 0,    0, 1, 0,    1, 1, 0},
+            {1, 1, 1,    1, 0, 1,    1, 0, 0, // +x face
+                    1, 0, 0,    1, 1, 0,    1, 1, 1},
+            {0, 1, 1,    0, 0, 1,    1, 0, 1, // +z face
+                    1, 0, 1,    1, 1, 1,    0, 1, 1},
+            {0, 1, 0,    0, 0, 0,    0, 0, 1, // -x face
+                    0, 0, 1,    0, 1, 1,    0, 1, 0},
+            {1, 1, 1,    1, 1, 0,    0, 1, 0, // Top face
+                    0, 1, 0,    0, 1, 1,    1, 1, 1},
+            {0, 0, 0,    1, 0, 0,    1, 0, 1, // Bottom face
+                    1, 0, 1,    0, 0, 1,    0, 0, 0}
+    };
+    static float[][] faceNormals = new float[][]{
+            {0, 0, -1,   0, 0, -1,   0, 0, -1, // -z
+                    0, 0, -1,   0, 0, -1,   0, 0, -1},
+            {1, 0, 0,    1, 0, 0,    1, 0, 0, // +x
+                    1, 0, 0,    1, 0, 0,    1, 0, 0},
+            {0, 0, 1,    0, 0, 1,    0, 0, 1, // +z
+                    0, 0, 1,    0, 0, 1,    0, 0, 1},
+            {-1, 0, 0,   -1, 0, 0,   -1, 0, 0, // -x
+                    -1, 0, 0,   -1, 0, 0,   -1, 0, 0},
+            {0, 1, 0,    0, 1, 0,    0, 1, 0, // Top
+                    0, 1, 0,    0, 1, 0,    0, 1, 0},
+            {0, -1, 0,   0, -1, 0,   0, -1, 0, // Bottom
+                    0, -1, 0,   0, -1, 0,   0, -1, 0}
+    };
+
     /**
      * Load cube model into GPU memory
      */
     public static void loadVAO() {
-        vaos = new HashMap<>();
-        // Vertices of a cube
-        float[] vertices = new float[]{
-            1, 1, 0,    1, 0, 0,    0, 0, 0, // -z face
-            0, 0, 0,    0, 1, 0,    1, 1, 0,
-            1, 1, 1,    1, 0, 1,    1, 0, 0, // +x face
-            1, 0, 0,    1, 1, 0,    1, 1, 1,
-            0, 1, 1,    0, 0, 1,    1, 0, 1, // +z face
-            1, 0, 1,    1, 1, 1,    0, 1, 1,
-            0, 1, 0,    0, 0, 0,    0, 0, 1, // -x face
-            0, 0, 1,    0, 1, 1,    0, 1, 0,
-            1, 1, 1,    1, 1, 0,    0, 1, 0, // Top face
-            0, 1, 0,    0, 1, 1,    1, 1, 1,
-            0, 0, 0,    1, 0, 0,    1, 0, 1, // Bottom face
-            1, 0, 1,    0, 0, 1,    0, 0, 0
-        };
-        float[] normals = new float[]{
-            0, 0, -1,   0, 0, -1,   0, 0, -1, // -z
-                0, 0, -1,   0, 0, -1,   0, 0, -1,
-                1, 0, 0,    1, 0, 0,    1, 0, 0, // +x
-                1, 0, 0,    1, 0, 0,    1, 0, 0,
-                0, 0, 1,    0, 0, 1,    0, 0, 1, // +z
-                0, 0, 1,    0, 0, 1,    0, 0, 1,
-                -1, 0, 0,   -1, 0, 0,   -1, 0, 0, // -x
-                -1, 0, 0,   -1, 0, 0,   -1, 0, 0,
-                0, 1, 0,    0, 1, 0,    0, 1, 0, // Top
-                0, 1, 0,    0, 1, 0,    0, 1, 0,
-                0, -1, 0,   0, -1, 0,   0, -1, 0, // Bottom
-                0, -1, 0,   0, -1, 0,   0, -1, 0,
-        };
-        vertexCount = vertices.length;
-
-        // Load each block type into gpu memory seperately (they have different texture coords :(  )
+        vao = new HashMap<>();
         for (BlockType type : BlockType.values()) {
+            vao.put(type, new Integer[6]);
+            // Loop over each face
+            for (int f = 0; f < 6; f++) {
+                // Vertex positions
+                vao.get(type)[f] = glGenVertexArrays();
+                GL30.glBindVertexArray(vao.get(type)[f]);
+                int vbo = GL15.glGenBuffers();
+                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
+                FloatBuffer buffer = BufferUtils.createFloatBuffer(6 * 3);
+                buffer.put(faceVertices[f]);
+                buffer.flip();
+                GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
+                GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 0, 0);
+                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 
-            // Vertices
-            vaos.put(type, GL30.glGenVertexArrays());
-            int vao = vaos.get(type);
-            // Bind it, so that we perform edits on this vao
-            GL30.glBindVertexArray(vao);
-            // Make a vertex buffer object, attached to the above vao
-            int vbo = GL15.glGenBuffers();
-            // Bind it, so that we perform edits on this vbo
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
-            // Put the vertex data into a read-ready buffer
-            FloatBuffer buffer = BufferUtils.createFloatBuffer(vertices.length);
-            buffer.put(vertices);
-            buffer.flip();
-            // Pipe the vertex data into the bound vbo
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
-            // This vbo will be at index 0 of the earlier vao
-            GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 0, 0);
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+                // Texture coordinates
+                float inc = (float) increment / (float) size;
+                Vector2f leftTop = new Vector2f(inc * textureLocation.get(type).x, inc * textureLocation.get(type).y);
+                float[] textureCoords = new float[6 * 2];
+                Vector2f coords = new Vector2f(0);
+                for (int o = 0; o < 6; o++) {
+                    if (o == 2 || o == 3 || o == 4) {
+                        coords.x = leftTop.x;
+                    } else {
+                        coords.x = leftTop.x + inc;
+                    }
+                    if (o == 1 || o == 2 || o == 3) {
+                        coords.y = leftTop.y + inc;
+                    } else {
+                        coords.y = leftTop.y;
+                    }
+                    textureCoords[2 * o] = coords.x;
+                    textureCoords[2 * o + 1] = coords.y;
+                }
+                vbo = GL15.glGenBuffers();
+                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
+                buffer = BufferUtils.createFloatBuffer(6 * 2);
+                buffer.put(textureCoords);
+                buffer.flip();
+                GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
+                GL20.glVertexAttribPointer(1, 2, GL11.GL_FLOAT, false, 0, 0);
+                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 
-            // Texture coords
-            float inc = (float) increment / (float) size;
-            // Find the texture coord of the left top of the sprite of this block type
-            Vector2f leftTop = new Vector2f(inc * textureLocation.get(type).x, inc * textureLocation.get(type).y);
-            float[] textureCoords = new float[vertices.length];
-            Vector2f coords = new Vector2f(0);
-            // Create an array of texture coords based on how we draw triangles into a cube
-            for (int i = 0; i < 36; i++) {
-                int o = i % 6;
-                if (o == 2 || o == 3 || o == 4) {
-                    coords.x = leftTop.x;
-                } else {
-                    coords.x = leftTop.x + inc;
-                }
-                if (o == 1 || o == 2 || o == 3) {
-                    coords.y = leftTop.y + inc;
-                } else {
-                    coords.y = leftTop.y;
-                }
-                textureCoords[2 * i] = coords.x;
-                textureCoords[2 * i + 1] = coords.y;
+                // Normals
+                vbo = GL15.glGenBuffers();
+                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
+                buffer = BufferUtils.createFloatBuffer(6 * 3);
+                buffer.put(faceNormals[f]);
+                buffer.flip();
+                GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
+                GL20.glVertexAttribPointer(2, 3, GL11.GL_FLOAT, false, 0, 0);
+                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+                GL30.glBindVertexArray(0);
             }
-            // Load the texture coords array into gpu memory
-            vbo = GL15.glGenBuffers();
-            // Bind it, so that we perform edits on this vbo
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
-            // Put the vertex data into a read-ready buffer
-            buffer = BufferUtils.createFloatBuffer(textureCoords.length);
-            buffer.put(textureCoords);
-            buffer.flip();
-            // Pipe the vertex data into the bound vbo
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
-            // This vbo will be at index 0 of the earlier vao
-            GL20.glVertexAttribPointer(1, 2, GL11.GL_FLOAT, false, 0, 0);
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-
-            // Normals
-            vbo = GL15.glGenBuffers();
-            // Bind it, so that we perform edits on this vbo
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
-            // Put the vertex data into a read-ready buffer
-            buffer = BufferUtils.createFloatBuffer(normals.length);
-            buffer.put(normals);
-            buffer.flip();
-            // Pipe the vertex data into the bound vbo
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
-            // This vbo will be at index 0 of the earlier vao
-            GL20.glVertexAttribPointer(2, 3, GL11.GL_FLOAT, false, 0, 0);
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-
-            GL30.glBindVertexArray(0);
         }
     }
 

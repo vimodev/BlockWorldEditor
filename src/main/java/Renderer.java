@@ -1,3 +1,4 @@
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
@@ -34,26 +35,18 @@ public class Renderer {
         shader.setUniform("projectionMatrix", world.camera.getProjection());
         shader.setUniform("viewMatrix", world.camera.getTransformation());
 
-        // We will draw blocks, so enable the block vao
-
         // Enable the block texture
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         GL11.glBindTexture(GL_TEXTURE_2D, Block.texture);
 
-        // For every block in the world, set its properties and draw
-        for (BlockType type : BlockType.values()) {
-            // Bind properties
-            GL30.glBindVertexArray(Block.vaos.get(type));
+        for (Chunk c : world.chunks) {
+            if (world.camera.position.distance(new Vector3f(c.origin.x, c.origin.y, c.origin.z)) > RENDER_DISTANCE) continue;
+            shader.setUniform("transformationMatrix", c.getTransformationMatrix());
+            GL30.glBindVertexArray(c.mesh);
             GL20.glEnableVertexAttribArray(0); // Vertices
             GL20.glEnableVertexAttribArray(1); // Texture coords
             GL20.glEnableVertexAttribArray(2); // Normals
-            // Draw every block of this type
-            for (Block block : world.blocks.get(type)) {
-                // If in render distance
-                if (world.camera.position.distance(block.position) > RENDER_DISTANCE) continue;
-                shader.setUniform("transformationMatrix", block.getTransformationMatrix());
-                GL11.glDrawArrays(GL_TRIANGLES, 0, Block.vertexCount);
-            }
+            GL11.glDrawArrays(GL_TRIANGLES, 0, c.vertexCount);
         }
 
         // Unbind everything for safety

@@ -5,7 +5,8 @@ import org.lwjgl.opengl.GL;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_LINE;
 
 /**
  * Main runnable application class
@@ -72,6 +73,8 @@ public class App {
         // Load Block model and texture
         Block.loadVAO();
         Block.loadTexture();
+
+//        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
     /**
@@ -86,10 +89,17 @@ public class App {
         float offset = 0;
         for (BlockType type : BlockType.values()) {
             for (int i = 0; i < 1000; i++) {
-                world.addBlock(new Block(offset, 0f, i * -2.0f, type));
+                world.addBlock(new Block(offset, 2f, i * -2.0f, type));
             }
             offset += 2.0f;
         }
+        for (int x = -50; x < 50; x++) {
+            for (int z = -50; z < 50; z++) {
+                world.addBlock(new Block(x, 1f, z, BlockType.STONE));
+            }
+        }
+
+        for (Chunk c : world.chunks) c.regenerateMesh();
 
         // Main game loop
         double accumulatedTime = 0;

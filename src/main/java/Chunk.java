@@ -17,12 +17,18 @@ public class Chunk {
     public static final int WIDTH = 32;
     public static final int HEIGHT = 256;
 
+    // 3d grid of blocks: x z y
     public Block[][][] blocks;
+    // Origin of the chunk in the world
     public Vector3i origin;
 
+    // First block in the chunk
     public Block first;
+    // Last block
     public Block last;
+    // We use this chain of pointers for efficient iteration over all blocks
 
+    // VAO that holds current mesh
     public int mesh;
     public int vertexCount;
     private List<Integer> vbos;
@@ -40,10 +46,17 @@ public class Chunk {
         return M;
     }
 
+    /**
+     * Set the block at local coords x y z to Block
+     * @param x
+     * @param y
+     * @param z
+     * @param block
+     */
     public void setBlock(int x, int y, int z, Block block) {
         blocks[x][z][y] = block;
         block.positionInChunk = new Vector3i(x, y, z);
-        // Set face data
+        // Set face data, which face faces another block? we dont need to render that one!
         if (x - 1 > 0 && blocks[x-1][z][y] != null) {
             block.faces[3] = false;
             blocks[x-1][z][y].faces[1] = false;
@@ -78,23 +91,32 @@ public class Chunk {
         }
     }
 
+    /**
+     * Given all block data, create a single mesh for efficient rendering
+     */
     public void regenerateMesh() {
+        // Delete previous mesh
         GL30.glDeleteVertexArrays(mesh);
         for (int vbo : vbos) {
             GL30.glDeleteBuffers(vbo);
         }
         vbos.clear();
+        // Create a new one
         mesh = GL30.glGenVertexArrays();
         GL30.glBindVertexArray(mesh);
         List<Float> positions = new ArrayList<>();
         List<Float> textureCoords = new ArrayList<>();
         List<Float> normals = new ArrayList<>();
+        // Go over all blocks
         Block block = first;
         while (block != null) {
+            // Calculate texture based on block type
             float inc = (float) Block.increment / (float) Block.size;
             Vector2f leftTop = new Vector2f(inc * Block.textureLocation.get(block.type).x, inc * Block.textureLocation.get(block.type).y);
+            // Go over all faces that need drawing
             for (int f = 0; f < 6; f++) {
                 if (!block.faces[f]) continue;
+                // Add all the vertex positions, textureCoords and normals for each face's vertices
                 for (int v = 0; v < 6; v++) {
                     positions.add(Block.faceVertices[f][v * 3] + block.positionInChunk.x);
                     positions.add(Block.faceVertices[f][v * 3 + 1] + block.positionInChunk.y);
@@ -111,6 +133,7 @@ public class Chunk {
             block = block.next;
         }
         vertexCount = positions.size() / 3;
+        // And proceed to load all that data into gpu memory
         // Positions
         int vbo = GL15.glGenBuffers();
         vbos.add(vbo);

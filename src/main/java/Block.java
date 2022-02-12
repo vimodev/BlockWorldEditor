@@ -38,8 +38,6 @@ enum BlockType {
  */
 public class Block {
 
-    static Map<BlockType, Integer[]> vao;
-
     // Texture stuff
     static final String textureFile = "textures.png";
     static final int size = 256;
@@ -110,69 +108,6 @@ public class Block {
             {0, -1, 0,   0, -1, 0,   0, -1, 0, // Bottom
                     0, -1, 0,   0, -1, 0,   0, -1, 0}
     };
-
-    /**
-     * Load cube model into GPU memory
-     */
-    public static void loadVAO() {
-        vao = new HashMap<>();
-        for (BlockType type : BlockType.values()) {
-            vao.put(type, new Integer[6]);
-            // Loop over each face
-            for (int f = 0; f < 6; f++) {
-                // Vertex positions
-                vao.get(type)[f] = glGenVertexArrays();
-                GL30.glBindVertexArray(vao.get(type)[f]);
-                int vbo = GL15.glGenBuffers();
-                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
-                FloatBuffer buffer = BufferUtils.createFloatBuffer(6 * 3);
-                buffer.put(faceVertices[f]);
-                buffer.flip();
-                GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
-                GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 0, 0);
-                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-
-                // Texture coordinates
-                float inc = (float) increment / (float) size;
-                Vector2f leftTop = new Vector2f(inc * textureLocation.get(type).x, inc * textureLocation.get(type).y);
-                float[] textureCoords = new float[6 * 2];
-                Vector2f coords = new Vector2f(0);
-                for (int o = 0; o < 6; o++) {
-                    if (o == 2 || o == 3 || o == 4) {
-                        coords.x = leftTop.x;
-                    } else {
-                        coords.x = leftTop.x + inc;
-                    }
-                    if (o == 1 || o == 2 || o == 3) {
-                        coords.y = leftTop.y + inc;
-                    } else {
-                        coords.y = leftTop.y;
-                    }
-                    textureCoords[2 * o] = coords.x;
-                    textureCoords[2 * o + 1] = coords.y;
-                }
-                vbo = GL15.glGenBuffers();
-                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
-                buffer = BufferUtils.createFloatBuffer(6 * 2);
-                buffer.put(textureCoords);
-                buffer.flip();
-                GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
-                GL20.glVertexAttribPointer(1, 2, GL11.GL_FLOAT, false, 0, 0);
-                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-
-                // Normals
-                vbo = GL15.glGenBuffers();
-                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
-                buffer = BufferUtils.createFloatBuffer(6 * 3);
-                buffer.put(faceNormals[f]);
-                buffer.flip();
-                GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
-                GL20.glVertexAttribPointer(2, 3, GL11.GL_FLOAT, false, 0, 0);
-                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-                GL30.glBindVertexArray(0);
-            }
-        }
-    }
 
     /**
      * Load the 2^k*2^k texture png into gpu memory

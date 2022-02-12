@@ -71,7 +71,6 @@ public class App {
         // Intitialize fps timer
         fps = new Timer();
         // Load Block model and texture
-        Block.loadVAO();
         Block.loadTexture();
 
 //        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -99,6 +98,7 @@ public class App {
             }
         }
 
+        // After editing all the chunks, we generate their mesh
         for (Chunk c : world.chunks) c.regenerateMesh();
 
         // Main game loop

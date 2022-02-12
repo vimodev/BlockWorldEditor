@@ -39,6 +39,7 @@ public class Renderer {
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         GL11.glBindTexture(GL_TEXTURE_2D, Block.texture);
 
+        // Render each chunk's mesh
         for (Chunk c : world.chunks) {
             if (world.camera.position.distance(new Vector3f(c.origin.x, c.origin.y, c.origin.z)) > RENDER_DISTANCE) continue;
             shader.setUniform("transformationMatrix", c.getTransformationMatrix());

@@ -60,7 +60,7 @@ public class App {
         // Make the window visible
         glfwShowWindow(window.getWindow());
         // Enable vsync
-//        glfwSwapInterval(1);
+        glfwSwapInterval(1);
         // Allows us to use OpenGL
         GL.createCapabilities();
         // Set the background clear color

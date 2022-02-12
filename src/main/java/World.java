@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.lwjgl.glfw.GLFW.*;
+
 /**
  * Generic container for anything that a block world might contain
  */
@@ -28,6 +30,9 @@ public class World {
     );
     // All point lights (e.g. light blocks, torches)
     public List<Light> pointLights = new ArrayList<Light>();
+
+    public int spaceCounter = 0;
+    public boolean flying = false;
 
     public World(App app) {
         this.app = app;
@@ -84,7 +89,16 @@ public class World {
     }
 
     public void applyInput(double dt) {
-        camera.freeMove(app, dt);
+        if (InputController.keyPressed(GLFW_KEY_F)) {
+            flying = !flying;
+        }
+
+        if (flying) {
+            camera.freeMove(app, dt);
+        } else {
+            camera.walkMove(app, dt);
+        }
+
     }
 
     public void render() {

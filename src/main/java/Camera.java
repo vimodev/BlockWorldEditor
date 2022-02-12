@@ -14,8 +14,13 @@ public class Camera {
 
     // Position of the camera
     public Vector3f position = new Vector3f(0, 10, 3);
+
+    // Current upwards velocity
+    private float upwardsVelocity = 0f;
+
     // Projection properties of the camera
     private Matrix4f projection = new Matrix4f();
+
     // Orientation properties
     private float pitch = 0;
     private float yaw = 0;
@@ -23,11 +28,12 @@ public class Camera {
 
     // Settings
     private float mouseSensitivity = 0.2f;
-    private float movementSpeed = 25f;
-    private float strafeSpeed = 25f;
-    private float verticalSpeed = 25f;
+    private float movementSpeed = 15f;
+    private float strafeSpeed = 10f;
+    private float verticalSpeed = 10f;
     private float fieldOfView = 70f;
-
+    private float gravity = -50;
+    private float jumpStrength = 20;
 
     // Is the mouse currently held
     private boolean mouseLocked = false;
@@ -62,7 +68,7 @@ public class Camera {
 
         // Keyboard movement
         float mv_scl_forward = InputController.keyHeldInt(GLFW_KEY_W) - InputController.keyHeldInt(GLFW_KEY_S);
-        float mv_Scl_upward = InputController.keyHeldInt(GLFW_KEY_SPACE) - InputController.keyHeldInt(GLFW_KEY_LEFT_SHIFT);
+        float mv_scl_upward = InputController.keyHeldInt(GLFW_KEY_SPACE) - InputController.keyHeldInt(GLFW_KEY_LEFT_SHIFT);
         float mv_scl_rightward = InputController.keyHeldInt(GLFW_KEY_D) - InputController.keyHeldInt(GLFW_KEY_A);
 
         Vector3f direction = getDirection();
@@ -71,8 +77,53 @@ public class Camera {
         right.cross(up);
 
         translate(direction.mul(mv_scl_forward * movementSpeed * (float) dt));
-        translate(up.mul(mv_Scl_upward * strafeSpeed * (float) dt));
-        translate(right.mul(mv_scl_rightward * verticalSpeed * (float) dt));
+        translate(up.mul(mv_scl_upward * verticalSpeed * (float) dt));
+        translate(right.mul(mv_scl_rightward * strafeSpeed * (float) dt));
+    }
+
+    /**
+     * Allow the camera to walk freely
+     * @param dt
+     */
+    public void walkMove(App app, double dt) {
+        // Use delta of mouse to move camera
+        DoubleBuffer x = BufferUtils.createDoubleBuffer(1);
+        DoubleBuffer y = BufferUtils.createDoubleBuffer(1);
+        glfwGetCursorPos(app.window.getWindow(), x, y);
+        x.rewind();
+        y.rewind();
+        double newX = x.get();
+        double newY = y.get();
+        double deltaX = newX - app.WINDOW_WIDTH / 2;
+        double deltaY = newY - app.WINDOW_HEIGHT / 2;
+
+        glfwSetCursorPos(app.window.getWindow(), app.WINDOW_WIDTH / 2, app.WINDOW_HEIGHT / 2);
+
+        yaw((float) deltaX * mouseSensitivity);
+        pitch((float) deltaY * mouseSensitivity);
+
+        // Keyboard movement
+        float mv_scl_forward = InputController.keyHeldInt(GLFW_KEY_W) - InputController.keyHeldInt(GLFW_KEY_S);
+        float mv_scl_rightward = InputController.keyHeldInt(GLFW_KEY_D) - InputController.keyHeldInt(GLFW_KEY_A);
+
+        int jump = InputController.keyHeldInt(GLFW_KEY_SPACE);
+
+        Vector3f direction = getDirection();
+        direction.y = 0;
+        Vector3f up = new Vector3f(0.0f, 1.0f, 0.0f);
+        Vector3f right = new Vector3f(direction);
+        right.cross(up);
+
+        translate(direction.mul(mv_scl_forward * movementSpeed * (float) dt));
+        translate(right.mul(mv_scl_rightward * strafeSpeed * (float) dt));
+        if(jump == 1) {
+            upwardsVelocity = jumpStrength;
+        }
+        translate(up.mul(upwardsVelocity * (float) dt));
+        upwardsVelocity += gravity * (float) dt;
+
+        // Hard-code collision at y=4
+        position.y = Math.max(position.y, 4f);
     }
 
     /**
@@ -142,6 +193,8 @@ public class Camera {
 
     public void pitch(float p) {
         pitch += p;
+        pitch = Math.max(pitch, -89f);
+        pitch = Math.min(pitch, 89f);
     }
 
     public void yaw(float y) {

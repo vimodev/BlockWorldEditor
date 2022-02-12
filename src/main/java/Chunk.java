@@ -57,7 +57,7 @@ public class Chunk {
         blocks[x][z][y] = block;
         block.positionInChunk = new Vector3i(x, y, z);
         // Set face data, which face faces another block? we dont need to render that one!
-        if (x - 1 > 0 && blocks[x-1][z][y] != null) {
+        if (x - 1 >= 0 && blocks[x-1][z][y] != null) {
             block.faces[3] = false;
             blocks[x-1][z][y].faces[1] = false;
         }
@@ -65,7 +65,7 @@ public class Chunk {
             block.faces[1] = false;
             blocks[x + 1][z][y].faces[3] = false;
         }
-        if (z - 1 > 0 && blocks[x][z-1][y] != null) {
+        if (z - 1 >= 0 && blocks[x][z-1][y] != null) {
             block.faces[2] = false;
             blocks[x][z-1][y].faces[0] = false;
         }
@@ -73,7 +73,7 @@ public class Chunk {
             block.faces[0] = false;
             blocks[x][z+1][y].faces[2] = false;
         }
-        if (y - 1 > 0 && blocks[x][z][y-1] != null) {
+        if (y - 1 >= 0 && blocks[x][z][y-1] != null) {
             block.faces[5] = false;
             blocks[x][z][y-1].faces[4] = false;
         }

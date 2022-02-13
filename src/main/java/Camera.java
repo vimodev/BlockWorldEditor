@@ -1,6 +1,7 @@
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
+import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 
 import java.nio.DoubleBuffer;
@@ -172,23 +173,6 @@ public class Camera {
         return dir;
     }
 
-    /**
-     * Read depth buffer and scale back to linear depth to get the depth at the center
-     * pixel of the window
-     * @param app
-     * @return
-     */
-    public float getDepthAtCrosshair(App app) {
-        // Read depth component at center of frame buffer
-        FloatBuffer buffer = BufferUtils.createFloatBuffer(1);
-        glReadPixels(app.WINDOW_WIDTH / 2, app.WINDOW_HEIGHT / 2, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, buffer);
-        float result = buffer.get();
-        // Scale back the result from [0,1] non-linear depth to world linear depth
-        result = result * 2f - 1f;
-        result = (2f * zNear * zFar) / (zFar + zNear - result * (zFar - zNear));
-        return result;
-    }
-
     public Vector3f getBlockPlaceCoordinatesAtCrosshair(App app, World world) {
         Vector3f direction = getDirection();
         // March a ray until we hit a block
@@ -198,9 +182,9 @@ public class Camera {
             direction.normalize(length);
             Vector3f wp = position.add(direction, new Vector3f());
             Chunk chunk = world.getChunkFromPosition(wp);
-            int x = (int) wp.x % Chunk.WIDTH;
-            int y = (int) wp.y % Chunk.HEIGHT;
-            int z = (int) wp.z % Chunk.WIDTH;
+            int x = (int) Math.floor(wp.x) % Chunk.WIDTH;
+            int y = (int) Math.floor(wp.y) % Chunk.HEIGHT;
+            int z = (int) Math.floor(wp.z) % Chunk.WIDTH;
             if (x < 0) x += Chunk.WIDTH;
             if (z < 0) z += Chunk.WIDTH;
             if (y < 0 || y >= Chunk.HEIGHT) return null;
@@ -227,9 +211,9 @@ public class Camera {
             direction.normalize(length);
             Vector3f wp = position.add(direction, new Vector3f());
             Chunk chunk = world.getChunkFromPosition(wp);
-            int x = (int) wp.x % Chunk.WIDTH;
-            int y = (int) wp.y % Chunk.HEIGHT;
-            int z = (int) wp.z % Chunk.WIDTH;
+            int x = (int) Math.floor(wp.x) % Chunk.WIDTH;
+            int y = (int) Math.floor(wp.y) % Chunk.HEIGHT;
+            int z = (int) Math.floor(wp.z) % Chunk.WIDTH;
             if (x < 0) x += Chunk.WIDTH;
             if (z < 0) z += Chunk.WIDTH;
             if (y < 0 || y >= Chunk.HEIGHT) return null;

@@ -80,9 +80,9 @@ public class World {
     // Add a block to its type list
     public void addBlock(Block block) {
         Chunk chunk = getChunkFromPosition(block.position);
-        int x = (int) block.position.x % Chunk.WIDTH;
-        int y = (int) block.position.y % Chunk.HEIGHT;
-        int z = (int) block.position.z % Chunk.WIDTH;
+        int x = (int) Math.floor(block.position.x) % Chunk.WIDTH;
+        int y = (int) Math.floor(block.position.y) % Chunk.HEIGHT;
+        int z = (int) Math.floor(block.position.z) % Chunk.WIDTH;
         if (x < 0) x += Chunk.WIDTH;
         if (z < 0) z += Chunk.WIDTH;
         chunk.setBlock(x, y, z, block);

@@ -159,16 +159,11 @@ public class Camera {
      * @return
      */
     public Vector3f getDirection() {
-        double yawRad = Math.toRadians(yaw-90f);
-        double pitchRad = Math.toRadians(-pitch);
-
-
-
         // Apply transformations
-        Vector3f dir = new Vector3f(
-                (float) (Math.cos(yawRad) * Math.cos(pitchRad)),
-                (float) Math.sin(pitchRad),
-                (float) (Math.sin(yawRad) * Math.cos(pitchRad))).normalize();
+        Vector3f dir = new Vector3f(0, 0, -1);
+        dir.rotateX((float) Math.toRadians(-pitch));
+        dir.rotateY((float) Math.toRadians(-yaw));
+        dir.rotateZ((float) Math.toRadians(roll));
         return dir;
     }
 

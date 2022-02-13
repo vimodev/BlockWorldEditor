@@ -109,7 +109,7 @@ public class App {
             accumulatedTime += dt;
 
             // Apply input to the world
-            world.applyInput(dt);
+            world.applyInput(this, dt);
             // Render the world
             world.render();
 

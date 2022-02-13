@@ -3,9 +3,12 @@ import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 
 import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
+
+import static org.lwjgl.opengl.GL11.*;
 
 /**
  * Contains camera attributes and functionality
@@ -33,6 +36,10 @@ public class Camera {
     private float fieldOfView = 70f;
     private float gravity = -50;
     private float jumpStrength = 20;
+    public float aspectRatio = 1920f / 1080f;
+    public float zNear = 0.1f;
+    public float zFar = 1000f;
+    public float clickRange = 10f;
 
 
 
@@ -40,7 +47,7 @@ public class Camera {
      * Create a new camera
      */
     public Camera() {
-        setProjection(1920.0f / 1080.0f, fieldOfView, 0.1f, 1000f);
+        setProjection(aspectRatio, fieldOfView, zNear, zFar);
     }
 
     /**
@@ -161,6 +168,63 @@ public class Camera {
                 (float) Math.sin(pitchRad),
                 (float) (Math.sin(yawRad) * Math.cos(pitchRad))).normalize();
         return dir;
+    }
+
+    /**
+     * Read depth buffer and scale back to linear depth to get the depth at the center
+     * pixel of the window
+     * @param app
+     * @return
+     */
+    public float getDepthAtCrosshair(App app) {
+        // Read depth component at center of frame buffer
+        FloatBuffer buffer = BufferUtils.createFloatBuffer(1);
+        glReadPixels(app.WINDOW_WIDTH / 2, app.WINDOW_HEIGHT / 2, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, buffer);
+        float result = buffer.get();
+        // Scale back the result from [0,1] non-linear depth to world linear depth
+        result = result * 2f - 1f;
+        result = (2f * zNear * zFar) / (zFar + zNear - result * (zFar - zNear));
+        return result;
+    }
+
+    /**
+     * Get the block currently pointed at by the crosshair
+     * @param app
+     * @param world
+     * @return
+     */
+    public Block getBlockAtCrosshair(App app, World world) {
+        // Get the depth
+        float depth = getDepthAtCrosshair(app);
+        if (depth >= clickRange || depth >= zFar) return null;
+        // Create a ray based on position, direction and depth
+        Vector3f ray = getDirection().mul(depth);
+        Vector3f pos = new Vector3f(position.x, position.y, position.z);
+        Vector3f worldPosition = pos.add(ray);
+        Chunk chunk = world.getChunkFromPosition(worldPosition);
+        int x = (int) worldPosition.x % Chunk.WIDTH;
+        int y = (int) worldPosition.y % Chunk.HEIGHT;
+        int z = (int) worldPosition.z % Chunk.WIDTH;
+        if (x < 0) x += Chunk.WIDTH;
+        if (z < 0) z += Chunk.WIDTH;
+        Block b1 = chunk.blocks[x][z][y];
+        // Create another just in case depth value was a little off
+        ray = getDirection().mul(depth + 0.1f);
+        pos = new Vector3f(position.x, position.y, position.z);
+        worldPosition = pos.add(ray);
+        chunk = world.getChunkFromPosition(worldPosition);
+        x = (int) worldPosition.x % Chunk.WIDTH;
+        y = (int) worldPosition.y % Chunk.HEIGHT;
+        z = (int) worldPosition.z % Chunk.WIDTH;
+        if (x < 0) x += Chunk.WIDTH;
+        if (z < 0) z += Chunk.WIDTH;
+        Block b2 = chunk.blocks[x][z][y];
+        // Then we return the closest of the two result
+        if (b1 == null && b2 == null) return null;
+        if (b2 == null) return b1;
+        if (b1 == null) return b2;
+        if (position.distance(b1.position) < position.distance(b2.position)) return b1;
+        return b2;
     }
 
     /**

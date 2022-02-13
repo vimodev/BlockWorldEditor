@@ -64,7 +64,7 @@ public class World {
 
     }
 
-    private Chunk getChunkFromPosition(Vector3f position) {
+    public Chunk getChunkFromPosition(Vector3f position) {
         int floorX = (int) Math.floor(position.x / Chunk.WIDTH) * Chunk.WIDTH;
         int floorZ = (int) Math.floor(position.z / Chunk.WIDTH) * Chunk.WIDTH;
         for (Chunk chunk : chunks) {
@@ -88,9 +88,19 @@ public class World {
         chunk.setBlock(x, y, z, block);
     }
 
-    public void applyInput(double dt) {
+    public void applyInput(App app, double dt) {
         if (InputController.keyPressed(GLFW_KEY_F)) {
             flying = !flying;
+        }
+
+        if (InputController.primaryMouseClicked()) {
+            Block block = camera.getBlockAtCrosshair(app, this);
+            if (block != null) {
+                System.out.println(block.position);
+                Chunk c = block.chunk;
+                c.removeBlock(block.positionInChunk.x, block.positionInChunk.y, block.positionInChunk.z);
+                c.regenerateMesh();
+            }
         }
 
         if (flying) {

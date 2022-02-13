@@ -93,6 +93,7 @@ public class Chunk {
     public void setBlock(int x, int y, int z, Block block) {
         blocks[x][z][y] = block;
         block.positionInChunk = new Vector3i(x, y, z);
+        block.chunk = this;
         // Set face data, which face faces another block? we dont need to render that one!
         if (x - 1 >= 0 && blocks[x-1][z][y] != null) {
             block.faces[3] = false;

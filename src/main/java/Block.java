@@ -61,6 +61,7 @@ public class Block {
     public Block previous;
     public Block next;
     public Vector3i positionInChunk;
+    public Chunk chunk;
 
     public Block(float x, float y, float z, BlockType type) {
         this.position = new Vector3f(x, y, z);

@@ -40,6 +40,7 @@ public class Camera {
     public float zNear = 0.1f;
     public float zFar = 1000f;
     public float clickRange = 10f;
+    public float marchStep = 0.005f;
 
 
 
@@ -194,37 +195,23 @@ public class Camera {
      * @return
      */
     public Block getBlockAtCrosshair(App app, World world) {
-        // Get the depth
-        float depth = getDepthAtCrosshair(app);
-        if (depth >= clickRange || depth >= zFar) return null;
-        // Create a ray based on position, direction and depth
-        Vector3f ray = getDirection().mul(depth);
-        Vector3f pos = new Vector3f(position.x, position.y, position.z);
-        Vector3f worldPosition = pos.add(ray);
-        Chunk chunk = world.getChunkFromPosition(worldPosition);
-        int x = (int) worldPosition.x % Chunk.WIDTH;
-        int y = (int) worldPosition.y % Chunk.HEIGHT;
-        int z = (int) worldPosition.z % Chunk.WIDTH;
-        if (x < 0) x += Chunk.WIDTH;
-        if (z < 0) z += Chunk.WIDTH;
-        Block b1 = chunk.blocks[x][z][y];
-        // Create another just in case depth value was a little off
-        ray = getDirection().mul(depth + 0.1f);
-        pos = new Vector3f(position.x, position.y, position.z);
-        worldPosition = pos.add(ray);
-        chunk = world.getChunkFromPosition(worldPosition);
-        x = (int) worldPosition.x % Chunk.WIDTH;
-        y = (int) worldPosition.y % Chunk.HEIGHT;
-        z = (int) worldPosition.z % Chunk.WIDTH;
-        if (x < 0) x += Chunk.WIDTH;
-        if (z < 0) z += Chunk.WIDTH;
-        Block b2 = chunk.blocks[x][z][y];
-        // Then we return the closest of the two result
-        if (b1 == null && b2 == null) return null;
-        if (b2 == null) return b1;
-        if (b1 == null) return b2;
-        if (position.distance(b1.position) < position.distance(b2.position)) return b1;
-        return b2;
+        Vector3f direction = getDirection();
+        // March a ray until we hit a block
+        for (float length = marchStep; length < clickRange; length += marchStep) {
+            direction.normalize(length);
+            Vector3f wp = position.add(direction, new Vector3f());
+            Chunk chunk = world.getChunkFromPosition(wp);
+            int x = (int) wp.x % Chunk.WIDTH;
+            int y = (int) wp.y % Chunk.HEIGHT;
+            int z = (int) wp.z % Chunk.WIDTH;
+            if (x < 0) x += Chunk.WIDTH;
+            if (z < 0) z += Chunk.WIDTH;
+            if (y < 0 || y >= Chunk.HEIGHT) return null;
+            if (chunk.blocks[x][z][y] != null) {
+                return chunk.blocks[x][z][y];
+            }
+        }
+        return null;
     }
 
     /**

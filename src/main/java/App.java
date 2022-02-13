@@ -1,12 +1,21 @@
+import org.lwjgl.BufferUtils;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
+import org.lwjgl.nanovg.NVGColor;
+import org.lwjgl.nanovg.NanoVG;
 import org.lwjgl.opengl.GL;
+
+import java.nio.FloatBuffer;
+
+import static java.sql.Types.NULL;
+import static org.lwjgl.nanovg.NanoVG.*;
+import static org.lwjgl.nanovg.NanoVGGL2.*;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.GL_LINE;
+
 
 /**
  * Main runnable application class
@@ -17,6 +26,10 @@ public class App {
     public int WINDOW_WIDTH = 1920;
     public int WINDOW_HEIGHT = 1080;
     public String WINDOW_TITLE = "BlockWorldEditor";
+
+    public long vg;
+    public float contentScaleX;
+    public float contentScaleY;
 
     public Timer fps;
 
@@ -73,6 +86,18 @@ public class App {
         // Load Block model and texture
         Block.loadTexture();
 
+        glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
+        // Nano VG stuff
+        vg = nvgCreate(NVG_ANTIALIAS);
+        if (vg == NULL) {
+            throw new IllegalStateException("Failed to initialize NanoVG");
+        }
+        FloatBuffer sx = BufferUtils.createFloatBuffer(1);
+        FloatBuffer sy = BufferUtils.createFloatBuffer(1);
+        glfwGetWindowContentScale(window.getWindow(), sx, sy);
+        contentScaleX = sx.get(0);
+        contentScaleY = sy.get(0);
 //        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
@@ -108,10 +133,14 @@ public class App {
             double dt = fps.dt();
             accumulatedTime += dt;
 
+            nvgBeginFrame(vg, WINDOW_WIDTH, WINDOW_HEIGHT, contentScaleY);
+
             // Apply input to the world
             world.applyInput(this, dt);
             // Render the world
             world.render();
+
+            renderUI();
 
             // Every second edit window title to show fps
             if (accumulatedTime > 1) {
@@ -119,16 +148,29 @@ public class App {
                 window.setTitle(WINDOW_TITLE + " " + String.format("%.2f", fps.getFrequency()) + " fps");
             }
             // Frame is ready
+            nvgEndFrame(vg);
             glfwSwapBuffers(window.getWindow());
             glfwPollEvents();
         }
 
     }
 
+    public void renderUI() {
+        // Render crosshair
+        int crossHairLength = 35;
+        int crossHairThickness = 3;
+        nvgBeginPath(vg);
+        nvgRect(vg, WINDOW_WIDTH / 2 - crossHairLength / 2, WINDOW_HEIGHT / 2 - crossHairThickness / 2, crossHairLength, crossHairThickness);
+        nvgRect(vg, WINDOW_WIDTH / 2 - crossHairThickness / 2, WINDOW_HEIGHT / 2 - crossHairLength / 2, crossHairThickness, crossHairLength);
+        nvgFillColor(vg, nvgRGB((byte) 0, (byte) 0, (byte) 0, NVGColor.create()));
+        nvgFill(vg);
+    }
+
     /**
      * Terminate the app, doing a proper clean up
      */
     public void terminate() {
+        nvgDelete(vg);
         // Clear any window callbacks
         glfwFreeCallbacks(window.getWindow());
         // Destroy the window

@@ -34,6 +34,8 @@ public class App {
 
     public Timer fps;
 
+    public boolean wireframe = false;
+
     /**
      * Run the application
      */
@@ -118,15 +120,19 @@ public class App {
         float offset = 0;
         for (BlockType type : BlockType.values()) {
             for (int i = 0; i < 1000; i++) {
-                world.addBlock(new Block(offset, 2f, i * -2.0f, type));
+                world.addBlock(new Block(offset, 50f, i * -2.0f, type));
             }
             offset += 2.0f;
         }
         for (int x = -50; x < 50; x++) {
             for (int z = -50; z < 50; z++) {
-                world.addBlock(new Block(x, 1f, z, BlockType.STONE));
+                for (int y = 0; y < 50; y++) {
+                    world.addBlock(new Block(x, y, z, BlockType.STONE));
+                }
             }
         }
+
+        world.camera.position.y = 51f;
 
         // After editing all the chunks, we generate their mesh
         for (Chunk c : world.chunks) c.regenerateMesh();
@@ -138,12 +144,18 @@ public class App {
             double dt = fps.dt();
             accumulatedTime += dt;
 
+            if (InputController.keyPressed(GLFW_KEY_F1)) {
+                wireframe = !wireframe;
+            }
+
             nvgBeginFrame(vg, WINDOW_WIDTH, WINDOW_HEIGHT, contentScaleY);
 
             // Apply input to the world
             world.applyInput(this, dt);
             // Render the world
+            if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             world.render();
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
             renderUI(world);
 
@@ -166,7 +178,7 @@ public class App {
         nvgFontSize(vg, 15);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGB((byte) 255, (byte) 255, (byte) 255, NVGColor.create()));
-        nvgText(vg, 10, 20, "ESC to quit, F to fly");
+        nvgText(vg, 10, 20, "ESC to quit, F to fly, F1 to toggle wireframe");
         // FPS counter
         nvgBeginPath(vg);
         nvgFontSize(vg, 15);

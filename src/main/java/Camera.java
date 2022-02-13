@@ -132,8 +132,8 @@ public class Camera {
         upwardsVelocity += gravity * (float) dt;
 
         // Hard-code collision at y=4
-        position.y = Math.max(position.y, 4f);
-        isAirborne = position.y != 4f;
+        position.y = Math.max(position.y, 52f);
+        isAirborne = position.y != 52f;
     }
 
     /**

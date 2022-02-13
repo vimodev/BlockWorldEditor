@@ -104,8 +104,6 @@ public class App {
         // Load font
         String path = this.getClass().getResource("OpenSans-Bold.ttf").getPath().toString().substring(1);
         font = nvgCreateFont(vg, "sans", path);
-
-//        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
     /**
@@ -147,8 +145,8 @@ public class App {
             // Render the world
             world.render();
 
-            renderUI();
-            
+            renderUI(world);
+
             if (accumulatedTime > 1) {
                 accumulatedTime -= 1;
             }
@@ -160,15 +158,33 @@ public class App {
 
     }
 
-    public void renderUI() {
+    public void renderUI(World world) {
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
+        // Keybinds
+        nvgBeginPath(vg);
+        nvgFontSize(vg, 15);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGB((byte) 255, (byte) 255, (byte) 255, NVGColor.create()));
+        nvgText(vg, 10, 20, "ESC to quit, F to fly");
         // FPS counter
         nvgBeginPath(vg);
         nvgFontSize(vg, 15);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGB((byte) 255, (byte) 255, (byte) 255, NVGColor.create()));
-        nvgText(vg, 10, 20, "FPS: " + String.format("%.0f", fps.getFrequency()));
+        nvgText(vg, 10, 35, "fps: " + String.format("%.0f", fps.getFrequency()));
+        // Camera coordinates
+        nvgBeginPath(vg);
+        nvgFontSize(vg, 15);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGB((byte) 255, (byte) 255, (byte) 255, NVGColor.create()));
+        nvgText(vg, 10, 50, "pos: " + world.camera.position);
+        // Camera dir
+        nvgBeginPath(vg);
+        nvgFontSize(vg, 15);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGB((byte) 255, (byte) 255, (byte) 255, NVGColor.create()));
+        nvgText(vg, 10, 65, "dir: " + world.camera.getDirection());
 
         // Render crosshair
         int crossHairLength = 35;
@@ -177,6 +193,7 @@ public class App {
         nvgRect(vg, WINDOW_WIDTH / 2 - crossHairLength / 2, WINDOW_HEIGHT / 2 - crossHairThickness / 2, crossHairLength, crossHairThickness);
         nvgRect(vg, WINDOW_WIDTH / 2 - crossHairThickness / 2, WINDOW_HEIGHT / 2 - crossHairLength / 2, crossHairThickness, crossHairLength);
         nvgFillColor(vg, nvgRGB((byte) 255, (byte) 255, (byte) 255, NVGColor.create()));
+
         nvgFill(vg);
         glEnable(GL_CULL_FACE);
     }

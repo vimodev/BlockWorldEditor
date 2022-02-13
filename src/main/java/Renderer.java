@@ -26,7 +26,7 @@ public class Renderer {
         glCullFace(GL_BACK);
         // Set clear color to sky color and clear
         GL11.glClearColor(world.skyColor.x, world.skyColor.y, world.skyColor.z, 1);
-        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         // Use default shader
         Shader shader = defaultShader;

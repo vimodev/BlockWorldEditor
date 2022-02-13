@@ -10,7 +10,7 @@ import java.nio.FloatBuffer;
 
 import static java.sql.Types.NULL;
 import static org.lwjgl.nanovg.NanoVG.*;
-import static org.lwjgl.nanovg.NanoVGGL2.*;
+import static org.lwjgl.nanovg.NanoVGGL3.*;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -28,6 +28,7 @@ public class App {
     public String WINDOW_TITLE = "BlockWorldEditor";
 
     public long vg;
+    public int font;
     public float contentScaleX;
     public float contentScaleY;
 
@@ -89,7 +90,8 @@ public class App {
         glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
         // Nano VG stuff
-        vg = nvgCreate(NVG_ANTIALIAS);
+        glEnable(GL_STENCIL_TEST);
+        vg = nvgCreate(NVG_ANTIALIAS | NVG_STENCIL_STROKES);
         if (vg == NULL) {
             throw new IllegalStateException("Failed to initialize NanoVG");
         }
@@ -98,6 +100,11 @@ public class App {
         glfwGetWindowContentScale(window.getWindow(), sx, sy);
         contentScaleX = sx.get(0);
         contentScaleY = sy.get(0);
+
+        // Load font
+        String path = this.getClass().getResource("OpenSans-Bold.ttf").getPath().toString().substring(1);
+        font = nvgCreateFont(vg, "sans", path);
+
 //        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
@@ -141,11 +148,9 @@ public class App {
             world.render();
 
             renderUI();
-
-            // Every second edit window title to show fps
+            
             if (accumulatedTime > 1) {
                 accumulatedTime -= 1;
-                window.setTitle(WINDOW_TITLE + " " + String.format("%.2f", fps.getFrequency()) + " fps");
             }
             // Frame is ready
             nvgEndFrame(vg);
@@ -156,14 +161,24 @@ public class App {
     }
 
     public void renderUI() {
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_DEPTH_TEST);
+        // FPS counter
+        nvgBeginPath(vg);
+        nvgFontSize(vg, 15);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGB((byte) 255, (byte) 255, (byte) 255, NVGColor.create()));
+        nvgText(vg, 10, 20, "FPS: " + String.format("%.0f", fps.getFrequency()));
+
         // Render crosshair
         int crossHairLength = 35;
         int crossHairThickness = 3;
         nvgBeginPath(vg);
         nvgRect(vg, WINDOW_WIDTH / 2 - crossHairLength / 2, WINDOW_HEIGHT / 2 - crossHairThickness / 2, crossHairLength, crossHairThickness);
         nvgRect(vg, WINDOW_WIDTH / 2 - crossHairThickness / 2, WINDOW_HEIGHT / 2 - crossHairLength / 2, crossHairThickness, crossHairLength);
-        nvgFillColor(vg, nvgRGB((byte) 0, (byte) 0, (byte) 0, NVGColor.create()));
+        nvgFillColor(vg, nvgRGB((byte) 255, (byte) 255, (byte) 255, NVGColor.create()));
         nvgFill(vg);
+        glEnable(GL_CULL_FACE);
     }
 
     /**

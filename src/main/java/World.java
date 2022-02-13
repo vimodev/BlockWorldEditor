@@ -93,6 +93,9 @@ public class World {
             flying = !flying;
         }
 
+        Block debugBlock = camera.getBlockAtCrosshair(app, this);
+        if (debugBlock != null) { debugBlock.type = BlockType.NONE; Chunk c = debugBlock.chunk; c.regenerateMesh(); }
+
         if (InputController.primaryMouseClicked()) {
             Block block = camera.getBlockAtCrosshair(app, this);
             if (block != null) {

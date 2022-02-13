@@ -1,5 +1,6 @@
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.lwjgl.BufferUtils;
 
 import java.nio.DoubleBuffer;
@@ -186,6 +187,31 @@ public class Camera {
         result = result * 2f - 1f;
         result = (2f * zNear * zFar) / (zFar + zNear - result * (zFar - zNear));
         return result;
+    }
+
+    public Vector3f getBlockPlaceCoordinatesAtCrosshair(App app, World world) {
+        Vector3f direction = getDirection();
+        // March a ray until we hit a block
+        Chunk previous;
+        Vector3i previousCoords = new Vector3i();
+        for (float length = marchStep; length < clickRange; length += marchStep) {
+            direction.normalize(length);
+            Vector3f wp = position.add(direction, new Vector3f());
+            Chunk chunk = world.getChunkFromPosition(wp);
+            int x = (int) wp.x % Chunk.WIDTH;
+            int y = (int) wp.y % Chunk.HEIGHT;
+            int z = (int) wp.z % Chunk.WIDTH;
+            if (x < 0) x += Chunk.WIDTH;
+            if (z < 0) z += Chunk.WIDTH;
+            if (y < 0 || y >= Chunk.HEIGHT) return null;
+            if (chunk.blocks[x][z][y] != null) {
+                // Backtrack to previous ray position and return
+                return new Vector3f(chunk.origin.x + previousCoords.x, chunk.origin.y + previousCoords.y, chunk.origin.z + previousCoords.z);
+            }
+            previous = chunk;
+            previousCoords = new Vector3i(x, y, z);
+        }
+        return null;
     }
 
     /**

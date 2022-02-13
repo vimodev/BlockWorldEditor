@@ -14,6 +14,7 @@ public class InputController {
     protected static Map<Integer, Timer> keyTimers; // indexed by key code
     protected static App app;
     protected static Timer primaryMouseTimer;
+    protected static Timer secondaryMouseTimer;
 
     /**
      * Initializes this controller to set its
@@ -26,6 +27,7 @@ public class InputController {
             keyTimers.put(i, new Timer());
         }
         primaryMouseTimer = new Timer();
+        secondaryMouseTimer = new Timer();
     }
 
     /**
@@ -57,6 +59,20 @@ public class InputController {
         if (dt < KEY_BOUNCE_TIME) return false;
         // Otherwise fetch result
         boolean result = primaryMouseButtonHeld();
+        // If it was pressed, we trigger the timer again
+        if (result) timer.dt();
+        return result;
+    }
+
+    public static boolean secondaryMouseClicked() {
+        // Get the appropriate timer
+        Timer timer = secondaryMouseTimer;
+        // Read the delta without triggering
+        double dt = timer.readDt();
+        // If debounce necessary, return false
+        if (dt < KEY_BOUNCE_TIME) return false;
+        // Otherwise fetch result
+        boolean result = secondaryMouseButtonHeld();
         // If it was pressed, we trigger the timer again
         if (result) timer.dt();
         return result;

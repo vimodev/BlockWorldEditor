@@ -96,10 +96,17 @@ public class World {
         if (InputController.primaryMouseClicked()) {
             Block block = camera.getBlockAtCrosshair(app, this);
             if (block != null) {
-                System.out.println(block.position);
                 Chunk c = block.chunk;
                 c.removeBlock(block.positionInChunk.x, block.positionInChunk.y, block.positionInChunk.z);
                 c.regenerateMesh();
+            }
+        }
+
+        if (InputController.secondaryMouseClicked()) {
+            Vector3f loc = camera.getBlockPlaceCoordinatesAtCrosshair(app, this);
+            if (loc != null) {
+                addBlock(new Block(loc.x, loc.y, loc.z, BlockType.BRICK));
+                getChunkFromPosition(loc).regenerateMesh();
             }
         }
 

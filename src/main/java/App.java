@@ -179,9 +179,15 @@ public class App {
 
             nvgBeginFrame(vg, WINDOW_WIDTH, WINDOW_HEIGHT, contentScaleY);
 
+            
+            // Rotate sun for day/night cycle
+            world.dirLight.position.rotateX((float) dt * 0.2f).normalize();
+            world.dirLight.position.rotateZ((float) dt * 0.1f).normalize();
+            
             // Apply input to the world or command line
             if (!CommandLine.show) world.applyInput(this, dt);
             else CommandLine.processInput();
+
             // Render the world
             if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             world.render();

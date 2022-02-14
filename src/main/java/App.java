@@ -177,25 +177,25 @@ public class App {
         nvgBeginPath(vg);
         nvgFontSize(vg, 15);
         nvgFontFace(vg, "sans");
-        nvgFillColor(vg, nvgRGB((byte) 255, (byte) 255, (byte) 255, NVGColor.create()));
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
         nvgText(vg, 10, 20, "ESC to quit, F to fly, F1 to toggle wireframe");
         // FPS counter
         nvgBeginPath(vg);
         nvgFontSize(vg, 15);
         nvgFontFace(vg, "sans");
-        nvgFillColor(vg, nvgRGB((byte) 255, (byte) 255, (byte) 255, NVGColor.create()));
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
         nvgText(vg, 10, 35, "fps: " + String.format("%.0f", fps.getFrequency()));
         // Camera coordinates
         nvgBeginPath(vg);
         nvgFontSize(vg, 15);
         nvgFontFace(vg, "sans");
-        nvgFillColor(vg, nvgRGB((byte) 255, (byte) 255, (byte) 255, NVGColor.create()));
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
         nvgText(vg, 10, 50, "pos: " + world.camera.position);
         // Camera dir
         nvgBeginPath(vg);
         nvgFontSize(vg, 15);
         nvgFontFace(vg, "sans");
-        nvgFillColor(vg, nvgRGB((byte) 255, (byte) 255, (byte) 255, NVGColor.create()));
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
         nvgText(vg, 10, 65, "dir: " + world.camera.getDirection());
 
         // Render crosshair
@@ -204,9 +204,10 @@ public class App {
         nvgBeginPath(vg);
         nvgRect(vg, WINDOW_WIDTH / 2 - crossHairLength / 2, WINDOW_HEIGHT / 2 - crossHairThickness / 2, crossHairLength, crossHairThickness);
         nvgRect(vg, WINDOW_WIDTH / 2 - crossHairThickness / 2, WINDOW_HEIGHT / 2 - crossHairLength / 2, crossHairThickness, crossHairLength);
-        nvgFillColor(vg, nvgRGB((byte) 255, (byte) 255, (byte) 255, NVGColor.create()));
-
+//        nvgFillColor(vg, nvgRGB((byte) 255, (byte) 255, (byte) 255, NVGColor.create()));
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
         nvgFill(vg);
+
         glEnable(GL_CULL_FACE);
     }
 

@@ -29,6 +29,7 @@ public class App {
 
     public long vg;
     public int font;
+    public int textureImg;
     public float contentScaleX;
     public float contentScaleY;
 
@@ -106,6 +107,23 @@ public class App {
         // Load font
         String path = this.getClass().getResource("OpenSans-Bold.ttf").getPath().toString().substring(1);
         font = nvgCreateFont(vg, "sans", path);
+
+        // Load texture img for UI
+        path = this.getClass().getResource("textures.png").getPath().toString().substring(1);
+        textureImg = nvgCreateImage(vg, path, NVG_IMAGE_NEAREST | NVG_IMAGE_PREMULTIPLIED);
+
+        // Initialize command line
+        CommandLine.init();
+        // And bind character input callback
+        glfwSetCharCallback(window.getWindow(), (long window, int code) -> {
+            CommandLine.processCharInput(code);
+        });
+
+        // Initialize toolbar
+        Toolbar.init();
+        glfwSetScrollCallback(window.getWindow(), (long window, double xoffset, double yoffset) -> {
+            Toolbar.processScroll(yoffset);
+        });
     }
 
     /**
@@ -144,18 +162,28 @@ public class App {
             double dt = fps.dt();
             accumulatedTime += dt;
 
+            // Toggle wireframe
             if (InputController.keyPressed(GLFW_KEY_F1)) {
                 wireframe = !wireframe;
             }
 
+            // Open and close command line
+            if (InputController.keyPressed(GLFW_KEY_ENTER)) {
+                CommandLine.show = !CommandLine.show;
+                CommandLine.content = "";
+            }
+
             nvgBeginFrame(vg, WINDOW_WIDTH, WINDOW_HEIGHT, contentScaleY);
 
-            world.dirLight.position.rotateX((float) dt * 0.2f);
-            world.dirLight.position.rotateZ((float) dt * 0.1f);
+            
+            // Rotate sun for day/night cycle
+            world.dirLight.position.rotateX((float) dt * 0.2f).normalize();
+            world.dirLight.position.rotateZ((float) dt * 0.1f).normalize();
+            
+            // Apply input to the world or command line
+            if (!CommandLine.show) world.applyInput(this, dt);
+            else CommandLine.processInput();
 
-
-            // Apply input to the world
-            world.applyInput(this, dt);
             // Render the world
             if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             world.render();
@@ -181,25 +209,25 @@ public class App {
         nvgBeginPath(vg);
         nvgFontSize(vg, 15);
         nvgFontFace(vg, "sans");
-        nvgFillColor(vg, nvgRGB((byte) 255, (byte) 255, (byte) 255, NVGColor.create()));
-        nvgText(vg, 10, 20, "ESC to quit, F to fly, F1 to toggle wireframe");
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
+        nvgText(vg, 10, 20, "ESC to quit, F to fly, F1 to toggle wireframe, ENTER to open command line");
         // FPS counter
         nvgBeginPath(vg);
         nvgFontSize(vg, 15);
         nvgFontFace(vg, "sans");
-        nvgFillColor(vg, nvgRGB((byte) 255, (byte) 255, (byte) 255, NVGColor.create()));
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
         nvgText(vg, 10, 35, "fps: " + String.format("%.0f", fps.getFrequency()));
         // Camera coordinates
         nvgBeginPath(vg);
         nvgFontSize(vg, 15);
         nvgFontFace(vg, "sans");
-        nvgFillColor(vg, nvgRGB((byte) 255, (byte) 255, (byte) 255, NVGColor.create()));
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
         nvgText(vg, 10, 50, "pos: " + world.camera.position);
         // Camera dir
         nvgBeginPath(vg);
         nvgFontSize(vg, 15);
         nvgFontFace(vg, "sans");
-        nvgFillColor(vg, nvgRGB((byte) 255, (byte) 255, (byte) 255, NVGColor.create()));
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
         nvgText(vg, 10, 65, "dir: " + world.camera.getDirection());
 
         // Render crosshair
@@ -208,9 +236,17 @@ public class App {
         nvgBeginPath(vg);
         nvgRect(vg, WINDOW_WIDTH / 2 - crossHairLength / 2, WINDOW_HEIGHT / 2 - crossHairThickness / 2, crossHairLength, crossHairThickness);
         nvgRect(vg, WINDOW_WIDTH / 2 - crossHairThickness / 2, WINDOW_HEIGHT / 2 - crossHairLength / 2, crossHairThickness, crossHairLength);
-        nvgFillColor(vg, nvgRGB((byte) 255, (byte) 255, (byte) 255, NVGColor.create()));
-
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
         nvgFill(vg);
+
+        // Draw toolbar
+        Toolbar.draw(this);
+
+        // Draw command line
+        if (CommandLine.show) {
+            CommandLine.draw(this);
+        }
+
         glEnable(GL_CULL_FACE);
     }
 

@@ -25,12 +25,14 @@ import static org.lwjgl.opengl.GL30.glGenerateMipmap;
  * All types of blocks
  */
 enum BlockType {
-    NONE,
+//    NONE,
     STONE,
     DIRT,
     PLANKS,
     BRICK,
     COBBLE,
+    SAND,
+    WOOL_WHITE,
 }
 
 /**
@@ -45,12 +47,14 @@ public class Block {
     static int texture = -1;
     // Locations of block type textures in the sprite map
     static final Map<BlockType, Vector2i> textureLocation = Map.of(
-            BlockType.NONE, new Vector2i(9, 1),
+//            BlockType.NONE, new Vector2i(9, 1),
             BlockType.STONE, new Vector2i(1, 0),
             BlockType.DIRT, new Vector2i(2, 0),
             BlockType.PLANKS, new Vector2i(4, 0),
             BlockType.BRICK, new Vector2i(7, 0),
-            BlockType.COBBLE, new Vector2i(0, 1)
+            BlockType.COBBLE, new Vector2i(0, 1),
+            BlockType.SAND, new Vector2i(2, 1),
+            BlockType.WOOL_WHITE, new Vector2i(0, 4)
     );
 
     public Vector3f position;

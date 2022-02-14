@@ -40,21 +40,21 @@ public class World {
         chunks = new ArrayList<>();
 
         pointLights.add(new Light(
-                new Vector3f(0f, 2f, 3f),
+                new Vector3f(0f, 52f, 3f),
                 new Vector3f(0.1f, 0.1f, 0.5f),
                 new Vector3f(0.1f, 0.1f, 0.4f),
                 new Vector3f(0.1f, 0.1f, 0.3f)
         ));
 
         pointLights.add(new Light(
-                new Vector3f(5f, 2f, 3f),
+                new Vector3f(5f, 52f, 3f),
                 new Vector3f(0.5f, 0.1f, 0.1f),
                 new Vector3f(0.4f, 0.1f, 0.1f),
                 new Vector3f(0.3f, 0.1f, 0.1f)
                 ));
 
         pointLights.add(new Light(
-                new Vector3f(10f, 2f, 3f),
+                new Vector3f(10f, 52f, 3f),
                 new Vector3f(0.1f, 0.5f, 0.1f),
                 new Vector3f(0.1f, 0.4f, 0.1f),
                 new Vector3f(0.1f, 0.3f, 0.1f)
@@ -92,9 +92,6 @@ public class World {
             flying = !flying;
         }
 
-//        Block debugBlock = camera.getBlockAtCrosshair(app, this);
-//        if (debugBlock != null) { debugBlock.type = BlockType.NONE; Chunk c = debugBlock.chunk; c.regenerateMesh(); }
-
         if (InputController.primaryMouseClicked()) {
             Block block = camera.getBlockAtCrosshair(app, this);
             if (block != null) {
@@ -106,8 +103,8 @@ public class World {
 
         if (InputController.secondaryMouseClicked()) {
             Vector3f loc = camera.getBlockPlaceCoordinatesAtCrosshair(app, this);
-            if (loc != null) {
-                addBlock(new Block(loc.x, loc.y, loc.z, BlockType.BRICK));
+            if (loc != null && Toolbar.getSelectedBlock() != null) {
+                addBlock(new Block(loc.x, loc.y, loc.z, Toolbar.getSelectedBlock()));
                 getChunkFromPosition(loc).regenerateMesh();
             }
         }

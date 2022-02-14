@@ -3,7 +3,7 @@ import org.joml.Vector3f;
 public class Light {
 
     // Position of the light, in the case of a directional light, this is the direction
-    private Vector3f position;
+    public Vector3f position;
 
     // Light attenuation, irrelevant (read: not used) for direction light
     // Default: distance=50 (https://wiki.ogre3d.org/tiki-index.php?page=-Point+Light+Attenuation)

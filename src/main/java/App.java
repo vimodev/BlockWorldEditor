@@ -150,6 +150,10 @@ public class App {
 
             nvgBeginFrame(vg, WINDOW_WIDTH, WINDOW_HEIGHT, contentScaleY);
 
+            world.dirLight.position.rotateX((float) dt * 0.2f);
+            world.dirLight.position.rotateZ((float) dt * 0.1f);
+
+
             // Apply input to the world
             world.applyInput(this, dt);
             // Render the world

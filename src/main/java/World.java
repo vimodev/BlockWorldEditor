@@ -24,14 +24,13 @@ public class World {
     // Directional light (e.g. the sun)
     public Light dirLight = new Light(
             new Vector3f(0f,-1f,0f),
-            new Vector3f(0.3f, 0.25f, 0.25f),
-            new Vector3f(0.2f, 0.15f, 0.15f),
+            new Vector3f(0.1f, 0.1f, 0.1f),
+            new Vector3f(0.4f, 0.35f, 0.35f),
             new Vector3f(0.1f, 0.1f, 0.1f)
     );
     // All point lights (e.g. light blocks, torches)
     public List<Light> pointLights = new ArrayList<Light>();
 
-    public int spaceCounter = 0;
     public boolean flying = false;
 
     public World(App app) {

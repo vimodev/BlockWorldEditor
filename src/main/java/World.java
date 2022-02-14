@@ -93,9 +93,6 @@ public class World {
             flying = !flying;
         }
 
-//        Block debugBlock = camera.getBlockAtCrosshair(app, this);
-//        if (debugBlock != null) { debugBlock.type = BlockType.NONE; Chunk c = debugBlock.chunk; c.regenerateMesh(); }
-
         if (InputController.primaryMouseClicked()) {
             Block block = camera.getBlockAtCrosshair(app, this);
             if (block != null) {
@@ -107,7 +104,7 @@ public class World {
 
         if (InputController.secondaryMouseClicked()) {
             Vector3f loc = camera.getBlockPlaceCoordinatesAtCrosshair(app, this);
-            if (loc != null) {
+            if (loc != null && Toolbar.getSelectedBlock() != null) {
                 addBlock(new Block(loc.x, loc.y, loc.z, Toolbar.getSelectedBlock()));
                 getChunkFromPosition(loc).regenerateMesh();
             }

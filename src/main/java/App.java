@@ -29,6 +29,7 @@ public class App {
 
     public long vg;
     public int font;
+    public int textureImg;
     public float contentScaleX;
     public float contentScaleY;
 
@@ -106,6 +107,10 @@ public class App {
         // Load font
         String path = this.getClass().getResource("OpenSans-Bold.ttf").getPath().toString().substring(1);
         font = nvgCreateFont(vg, "sans", path);
+
+        // Load texture img for UI
+        path = this.getClass().getResource("textures.png").getPath().toString().substring(1);
+        textureImg = nvgCreateImage(vg, path, NVG_IMAGE_NEAREST | NVG_IMAGE_PREMULTIPLIED);
 
         // Initialize command line
         CommandLine.init();

@@ -41,21 +41,21 @@ public class World {
         chunks = new ArrayList<>();
 
         pointLights.add(new Light(
-                new Vector3f(0f, 2f, 3f),
+                new Vector3f(0f, 52f, 3f),
                 new Vector3f(0.1f, 0.1f, 0.5f),
                 new Vector3f(0.1f, 0.1f, 0.4f),
                 new Vector3f(0.1f, 0.1f, 0.3f)
         ));
 
         pointLights.add(new Light(
-                new Vector3f(5f, 2f, 3f),
+                new Vector3f(5f, 52f, 3f),
                 new Vector3f(0.5f, 0.1f, 0.1f),
                 new Vector3f(0.4f, 0.1f, 0.1f),
                 new Vector3f(0.3f, 0.1f, 0.1f)
                 ));
 
         pointLights.add(new Light(
-                new Vector3f(10f, 2f, 3f),
+                new Vector3f(10f, 52f, 3f),
                 new Vector3f(0.1f, 0.5f, 0.1f),
                 new Vector3f(0.1f, 0.4f, 0.1f),
                 new Vector3f(0.1f, 0.3f, 0.1f)

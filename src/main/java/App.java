@@ -113,6 +113,12 @@ public class App {
         glfwSetCharCallback(window.getWindow(), (long window, int code) -> {
             CommandLine.processCharInput(code);
         });
+
+        // Initialize toolbar
+        Toolbar.init();
+        glfwSetScrollCallback(window.getWindow(), (long window, double xoffset, double yoffset) -> {
+            Toolbar.processScroll(yoffset);
+        });
     }
 
     /**
@@ -221,6 +227,9 @@ public class App {
         nvgRect(vg, WINDOW_WIDTH / 2 - crossHairThickness / 2, WINDOW_HEIGHT / 2 - crossHairLength / 2, crossHairThickness, crossHairLength);
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
         nvgFill(vg);
+
+        // Draw toolbar
+        Toolbar.draw(this);
 
         // Draw command line
         if (CommandLine.show) {

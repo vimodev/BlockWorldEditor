@@ -108,7 +108,7 @@ public class World {
         if (InputController.secondaryMouseClicked()) {
             Vector3f loc = camera.getBlockPlaceCoordinatesAtCrosshair(app, this);
             if (loc != null) {
-                addBlock(new Block(loc.x, loc.y, loc.z, BlockType.BRICK));
+                addBlock(new Block(loc.x, loc.y, loc.z, Toolbar.getSelectedBlock()));
                 getChunkFromPosition(loc).regenerateMesh();
             }
         }

@@ -2,6 +2,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector4f;
+import org.json.JSONObject;
 import org.lwjgl.BufferUtils;
 
 import java.nio.DoubleBuffer;
@@ -26,9 +27,9 @@ public class Camera {
     private Matrix4f projection = new Matrix4f();
 
     // Orientation properties
-    private float pitch = 0;
-    private float yaw = 0;
-    private float roll = 0;
+    public float pitch = 0;
+    public float yaw = 0;
+    public float roll = 0;
 
     // Settings
     private float mouseSensitivity = 0.2f;
@@ -218,6 +219,21 @@ public class Camera {
             }
         }
         return null;
+    }
+
+    public JSONObject toJSON() {
+        JSONObject cameraJSON = new JSONObject();
+        JSONObject cameraPosition = new JSONObject();
+        cameraPosition.put("x", position.x);
+        cameraPosition.put("y", position.y);
+        cameraPosition.put("z", position.z);
+        cameraJSON.put("position", cameraPosition);
+        JSONObject cameraRotation = new JSONObject();
+        cameraRotation.put("pitch", pitch);
+        cameraRotation.put("yaw", yaw);
+        cameraRotation.put("roll", roll);
+        cameraJSON.put("rotation", cameraRotation);
+        return cameraJSON;
     }
 
     /**

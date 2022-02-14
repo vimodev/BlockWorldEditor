@@ -34,6 +34,7 @@ public class App {
     public float contentScaleY;
 
     public Timer fps;
+    public World world;
 
     public boolean wireframe = false;
 
@@ -132,7 +133,7 @@ public class App {
     public void loop() {
 
         // Make a world instance with some blocks
-        World world = new World(this);
+        world = new World(this);
 
         // Generate some blocks of all types
         float offset = 0;
@@ -152,6 +153,8 @@ public class App {
 
         world.camera.position.y = 51f;
 
+//        World world = WorldManager.importWorld(this);
+
         // After editing all the chunks, we generate their mesh
         for (Chunk c : world.chunks) c.regenerateMesh();
 
@@ -169,6 +172,7 @@ public class App {
 
             // Open and close command line
             if (InputController.keyPressed(GLFW_KEY_ENTER)) {
+                if (CommandLine.show) executeCommand(CommandLine.content);
                 CommandLine.show = !CommandLine.show;
                 CommandLine.content = "";
             }
@@ -242,6 +246,17 @@ public class App {
         }
 
         glEnable(GL_CULL_FACE);
+    }
+
+    public void executeCommand(String command) {
+        command = command.trim().toLowerCase();
+        if (command.length() == 0) return;
+        System.out.println("Running command: " + command);
+        if (command.equals("import")) {
+            world = WorldManager.importWorld(this);
+        } else if (command.equals("export")) {
+            WorldManager.exportWorld(world);
+        }
     }
 
     /**

@@ -1,20 +1,21 @@
 import org.joml.Vector3f;
+import org.json.JSONObject;
 
 public class Light {
 
     // Position of the light, in the case of a directional light, this is the direction
-    private Vector3f position;
+    public Vector3f position;
 
     // Light attenuation, irrelevant (read: not used) for direction light
     // Default: distance=50 (https://wiki.ogre3d.org/tiki-index.php?page=-Point+Light+Attenuation)
-    private float constant = 1.0f;
-    private float linear = 0.09f;
-    private float quadratic = 0.032f;
+    public float constant = 1.0f;
+    public float linear = 0.09f;
+    public float quadratic = 0.032f;
 
     // Light properties
-    private Vector3f ambient = new Vector3f(0.5f, 0.5f, 0.5f);
-    private Vector3f diffuse = new Vector3f(0.5f, 0.5f, 0.5f);
-    private Vector3f specular = new Vector3f(0.2f, 0.2f, 0.2f);
+    public Vector3f ambient = new Vector3f(0.5f, 0.5f, 0.5f);
+    public Vector3f diffuse = new Vector3f(0.5f, 0.5f, 0.5f);
+    public Vector3f specular = new Vector3f(0.2f, 0.2f, 0.2f);
 
     public Light(Vector3f position) {
         this.position = position;
@@ -35,6 +36,31 @@ public class Light {
         this.constant = constant;
         this.linear = linear;
         this.quadratic = quadratic;
+    }
+
+    public JSONObject toJSON() {
+        JSONObject lightJSON = new JSONObject();
+        JSONObject lightPosition = new JSONObject();
+        lightPosition.put("x", position.x);
+        lightPosition.put("y", position.y);
+        lightPosition.put("z", position.z);
+        lightJSON.put("position", lightPosition);
+        JSONObject lightAmbient = new JSONObject();
+        lightAmbient.put("r", ambient.x);
+        lightAmbient.put("g", ambient.y);
+        lightAmbient.put("b", ambient.z);
+        lightJSON.put("ambient", lightAmbient);
+        JSONObject lightDiffuse = new JSONObject();
+        lightDiffuse.put("r", diffuse.x);
+        lightDiffuse.put("g", diffuse.y);
+        lightDiffuse.put("b", diffuse.z);
+        lightJSON.put("diffuse", lightDiffuse);
+        JSONObject lightSpecular = new JSONObject();
+        lightSpecular.put("r", specular.x);
+        lightSpecular.put("g", specular.y);
+        lightSpecular.put("b", specular.z);
+        lightJSON.put("specular", lightSpecular);
+        return lightJSON;
     }
 
     public void addToShaderAsDirLight(Shader shader) {

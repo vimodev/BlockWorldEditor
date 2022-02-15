@@ -112,6 +112,7 @@ public class Camera {
             if (world.getBlockFromPosition(position.add(new Vector3f(0, step.y, 0), new Vector3f())) != null) {
                 position.y = (float) ((step.y < 0) ? Math.floor(position.y) : Math.ceil(position.y));
                 isAirborne = false;
+                velocity.y = 0;
             } else {
                 position.y = position.y + step.y;
             }

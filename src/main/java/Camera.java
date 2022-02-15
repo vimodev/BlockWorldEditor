@@ -118,11 +118,13 @@ public class Camera {
             }
             if (world.getBlockFromPosition(position.add(new Vector3f(step.x, 0, 0), new Vector3f())) != null) {
                 position.x = (float) ((step.x < 0) ? Math.floor(position.x) : Math.ceil(position.x));
+                velocity.x = 0;
             } else {
                 position.x = position.x + step.x;
             }
             if (world.getBlockFromPosition(position.add(new Vector3f(0, 0, step.z), new Vector3f())) != null) {
                 position.z = (float) ((step.z < 0) ? Math.floor(position.z) : Math.ceil(position.z));
+                velocity.z = 0;
             } else {
                 position.z = position.z + step.z;
             }

@@ -7,6 +7,9 @@ import org.lwjgl.BufferUtils;
 
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
@@ -20,8 +23,9 @@ public class Camera {
 
     // Properties of the camera
     public Vector3f position = new Vector3f(0, 10, 3);
-    private float upwardsVelocity = 0f;
+    public Vector3f velocity = new Vector3f(0, 0, 0);
     private boolean isAirborne = true;
+    public World world;
 
     // Projection properties of the camera
     private Matrix4f projection = new Matrix4f();
@@ -50,8 +54,80 @@ public class Camera {
     /**
      * Create a new camera
      */
-    public Camera() {
+    public Camera(World world) {
         setProjection(aspectRatio, fieldOfView, zNear, zFar);
+        this.world = world;
+    }
+
+    private static boolean isAabbCollision(Vector3f bo, Vector3f bd, Block block) {
+        Vector3f p = new Vector3f(block.position);
+        return (
+                        bo.x        < p.x + 1   &&
+                        bo.x + bd.x > p.x       &&
+                        bo.y        < p.y + 1   &&
+                        bo.y + bd.y > p.y       &&
+                        bo.z        < p.z + 1   &&
+                        bo.z + bd.z > p.z
+                );
+    }
+
+    private static Vector3f getAabbDistance(Vector3f bo, Vector3f bd, Block block) {
+        Vector3f delta = new Vector3f(0);
+        Vector3f p = new Vector3f(block.position);
+        if (bo.x < p.x)         delta.x = p.x - (bo.x + bd.x);
+        else if (p.x > bo.x)    delta.x = bo.x - (p.x + 1);
+        if (bo.y < p.y)         delta.y = p.y - (bo.y + bd.y);
+        else if (p.y > bo.y)    delta.y = bo.y - (p.y + 1);
+        if (bo.z < p.z)         delta.z = p.z - (bo.z + bd.z);
+        else if (p.z > bo.z)    delta.z = bo.z - (p.z + 1);
+        return delta;
+    }
+
+    private void collisionCheck(Vector3f bo, Vector3f bd) {
+        List<Block> candidates = new ArrayList<>();
+        for (float dx = -1; dx < bd.x + 1; dx++) {
+            for (float dy = -1; dy < bd.y + 1; dy++) {
+                for (float dz = -1; dz < bd.z + 1; dz++) {
+                    Block block = world.getBlockFromPosition(new Vector3f(
+                            bo.x + dx, bo.y + dy, + bo.z + dz
+                    ));
+                    if (block != null && !candidates.contains(block)) candidates.add(block);
+                }
+            }
+        }
+        if (candidates.isEmpty()) return;
+        for (Block candidate : candidates) {
+            if (isAabbCollision(bo, bd, candidate)) System.out.println("colliding");
+        }
+    }
+
+    private void applyVelocity(double dt) {
+        Vector3f step = velocity.mul((float) dt, new Vector3f());
+        Vector3f next = position.add(step, new Vector3f());
+        Block block = world.getBlockFromPosition(next);
+        // We will collide
+        if (block != null) {
+            // Apply movement axis per axis and check for collision
+            // Y axis
+            if (world.getBlockFromPosition(position.add(new Vector3f(0, step.y, 0), new Vector3f())) != null) {
+                position.y = (float) ((step.y < 0) ? Math.floor(position.y) : Math.ceil(position.y));
+                isAirborne = false;
+            } else {
+                position.y = position.y + step.y;
+            }
+            if (world.getBlockFromPosition(position.add(new Vector3f(step.x, 0, 0), new Vector3f())) != null) {
+                position.x = (float) ((step.x < 0) ? Math.floor(position.x) : Math.ceil(position.x));
+            } else {
+                position.x = position.x + step.x;
+            }
+            if (world.getBlockFromPosition(position.add(new Vector3f(0, 0, step.z), new Vector3f())) != null) {
+                position.z = (float) ((step.z < 0) ? Math.floor(position.z) : Math.ceil(position.z));
+            } else {
+                position.z = position.z + step.z;
+            }
+        } else {
+            translate(step);
+        }
     }
 
     /**
@@ -85,9 +161,11 @@ public class Camera {
         Vector3f right = new Vector3f(direction);
         right.cross(up);
 
-        translate(direction.mul(mv_scl_forward * movementSpeed * (float) dt));
-        translate(up.mul(mv_scl_upward * verticalSpeed * (float) dt));
-        translate(right.mul(mv_scl_rightward * strafeSpeed * (float) dt));
+        velocity = new Vector3f(0);
+        velocity.add(direction.mul(mv_scl_forward * movementSpeed));
+        velocity.add(up.mul(mv_scl_upward * verticalSpeed));
+        velocity.add(right.mul(mv_scl_rightward * strafeSpeed));
+        applyVelocity(dt);
     }
 
     /**
@@ -124,17 +202,17 @@ public class Camera {
         Vector3f right = new Vector3f(direction);
         right.cross(up);
 
-        translate(direction.mul(mv_scl_forward * movementSpeed * (float) dt));
-        translate(right.mul(mv_scl_rightward * strafeSpeed * (float) dt));
+        velocity.x = 0;
+        velocity.z = 0;
+        velocity.add(direction.mul(mv_scl_forward * movementSpeed));
+        velocity.add(right.mul(mv_scl_rightward * strafeSpeed));
         if(jump == 1 && !isAirborne) {
-            upwardsVelocity = jumpStrength;
+            velocity.y = jumpStrength;
+            isAirborne = true;
         }
-        translate(up.mul(upwardsVelocity * (float) dt));
-        upwardsVelocity += gravity * (float) dt;
+        velocity.y += gravity * (float) dt;
 
-        // Hard-code collision at y=4
-        position.y = Math.max(position.y, 52f);
-        isAirborne = position.y != 52f;
+        applyVelocity(dt);
     }
 
     /**

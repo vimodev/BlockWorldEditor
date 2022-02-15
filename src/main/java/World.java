@@ -1,4 +1,5 @@
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,9 +36,9 @@ public class World {
 
     public World(App app) {
         this.app = app;
-        camera = new Camera();
         skyColor = new Vector3f(0.2f, 0.6f, 0.8f);
         chunks = new ArrayList<>();
+        camera = new Camera(this);
 
         pointLights.add(new Light(
                 new Vector3f(0f, 52f, 3f),
@@ -74,6 +75,15 @@ public class World {
         Chunk chunk = new Chunk(floorX, 0, floorZ);
         chunks.add(chunk);
         return chunk;
+    }
+
+    public Block getBlockFromPosition(Vector3f position) {
+        Chunk chunk = getChunkFromPosition(position);
+        Vector3i loc = chunk.getLocalPosition(position);
+        if (loc.y >= 0) {
+            return chunk.blocks[loc.x][loc.z][loc.y];
+        }
+        return null;
     }
 
     // Add a block to its type list

@@ -46,6 +46,15 @@ public class Chunk {
         return M;
     }
 
+    public Vector3i getLocalPosition(Vector3f loc) {
+        int x = (int) Math.floor(loc.x) % Chunk.WIDTH;
+        int y = (int) Math.floor(loc.y) % Chunk.HEIGHT;
+        int z = (int) Math.floor(loc.z) % Chunk.WIDTH;
+        if (x < 0) x += Chunk.WIDTH;
+        if (z < 0) z += Chunk.WIDTH;
+        return new Vector3i(x, y, z);
+    }
+
     public Block removeBlock(int x, int y, int z) {
         Block block = blocks[x][z][y];
         if (block == null) return null;

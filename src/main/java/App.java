@@ -6,6 +6,7 @@ import org.lwjgl.nanovg.NVGColor;
 import org.lwjgl.nanovg.NanoVG;
 import org.lwjgl.opengl.GL;
 
+import javax.swing.*;
 import java.nio.FloatBuffer;
 
 import static java.sql.Types.NULL;
@@ -166,11 +167,6 @@ public class App {
             double dt = fps.dt();
             accumulatedTime += dt;
 
-            // Toggle wireframe
-            if (InputController.keyPressed(GLFW_KEY_F1)) {
-                wireframe = !wireframe;
-            }
-
             // Open and close command line
             if (InputController.keyPressed(GLFW_KEY_ENTER)) {
                 if (CommandLine.show) executeCommand(CommandLine.content);
@@ -215,7 +211,7 @@ public class App {
         nvgFontSize(vg, 15);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
-        nvgText(vg, 10, 20, "ESC to quit, F to fly, F1 to toggle wireframe, ENTER to open command line");
+        nvgText(vg, 10, 20, "ESC to quit, F to fly, ENTER to open command line, type 'help' for commands");
         // FPS counter
         nvgBeginPath(vg);
         nvgFontSize(vg, 15);
@@ -259,11 +255,26 @@ public class App {
         command = command.trim().toLowerCase();
         if (command.length() == 0) return;
         System.out.println("Running command: " + command);
-        if (command.equals("import")) {
+        if (command.equals("help")) {
+            StringBuilder h = new StringBuilder();
+            h.append("HELP\n");
+            h.append("import    Imports a saved world from file.\n");
+            h.append("export    Exports current world to file\n");
+            h.append("wireframe <on/off>    Toggle wireframe rendering\n");
+            h.append("vsync <on/off>    Toggle vsync\n");
+            JOptionPane.showMessageDialog(new JDialog(), h.toString());
+        } else if (command.equals("import")) {
             world = WorldManager.importWorld(this);
         } else if (command.equals("export")) {
             WorldManager.exportWorld(world);
+        } else if (command.startsWith("wireframe")) {
+            if (command.equals("wireframe on")) wireframe = true;
+            else if (command.equals("wireframe off")) wireframe = false;
+        } else if (command.startsWith("vsync")) {
+            if (command.equals("vsync off")) glfwSwapInterval(0);
+            else if (command.equals("vsync on")) glfwSwapInterval(1);
         }
+        fps.dt();
     }
 
     /**

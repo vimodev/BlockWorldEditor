@@ -104,29 +104,39 @@ public class Camera {
     private void applyVelocity(double dt) {
         Vector3f step = velocity.mul((float) dt, new Vector3f());
         Vector3f next = position.add(step, new Vector3f());
-        Block block = world.getBlockFromPosition(next);
         // We will collide
-        if (world.getBlockFromPosition(next) != null || world.getBlockFromPosition(next.add(0, -1.5f, 0, new Vector3f())) != null) {
+        float[] yoffsets = new float[]{-1.5f, -1.0f, -0.5f, 0f, 0.15f};
+        // We will collide
+        if (world.getBlockFromPosition(next) != null || world.getBlockFromPosition(next.add(0, yoffsets[0], 0, new Vector3f())) != null) {
             // Apply movement axis per axis and check for collision
             // Y axis
-            if (world.getBlockFromPosition(position.add(new Vector3f(0, step.y, 0), new Vector3f())) != null ||
-                    world.getBlockFromPosition(position.add(new Vector3f(0, step.y - 1.5f, 0), new Vector3f())) != null) {
-                position.y = (float) ((step.y < 0) ? Math.floor(position.y) + .5f : Math.ceil(position.y));
+            boolean yColliding = false;
+            for (float y : yoffsets) {
+                yColliding = yColliding || world.getBlockFromPosition(position.add(new Vector3f(0, step.y + y, 0), new Vector3f())) != null;
+            }
+            if (yColliding) {
+                position.y = (float) Math.floor(position.y) - (yoffsets[0] % 1f);
                 isAirborne = false;
                 velocity.y = 0;
             } else {
                 position.y = position.y + step.y;
                 isAirborne = true;
             }
-            if (world.getBlockFromPosition(position.add(new Vector3f(step.x, 0, 0), new Vector3f())) != null ||
-                    world.getBlockFromPosition(position.add(new Vector3f(step.x, -1.5f, 0), new Vector3f())) != null) {
+            boolean xColliding = false;
+            for (float y : yoffsets) {
+                xColliding = xColliding || world.getBlockFromPosition(position.add(new Vector3f(step.x, y, 0), new Vector3f())) != null;
+            }
+            if (xColliding) {
                 position.x = (float) ((step.x < 0) ? Math.floor(position.x) : Math.ceil(position.x));
                 velocity.x = 0;
             } else {
                 position.x = position.x + step.x;
             }
-            if (world.getBlockFromPosition(position.add(new Vector3f(0, 0, step.z), new Vector3f())) != null ||
-                    world.getBlockFromPosition(position.add(new Vector3f(0, -1.5f, step.z), new Vector3f())) != null) {
+            boolean zColliding = false;
+            for (float y : yoffsets) {
+                zColliding = zColliding || world.getBlockFromPosition(position.add(new Vector3f(0, y, step.z), new Vector3f())) != null;
+            }
+            if (zColliding) {
                 position.z = (float) ((step.z < 0) ? Math.floor(position.z) : Math.ceil(position.z));
                 velocity.z = 0;
             } else {

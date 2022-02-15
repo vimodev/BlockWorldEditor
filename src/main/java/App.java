@@ -159,6 +159,7 @@ public class App {
         for (Chunk c : world.chunks) c.regenerateMesh();
 
         // Main game loop
+        fps.dt();
         double accumulatedTime = 0;
         while ( !glfwWindowShouldClose(window.getWindow()) ) {
             // Get time delta

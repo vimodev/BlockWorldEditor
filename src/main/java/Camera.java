@@ -106,23 +106,27 @@ public class Camera {
         Vector3f next = position.add(step, new Vector3f());
         Block block = world.getBlockFromPosition(next);
         // We will collide
-        if (block != null) {
+        if (world.getBlockFromPosition(next) != null || world.getBlockFromPosition(next.add(0, -1.5f, 0, new Vector3f())) != null) {
             // Apply movement axis per axis and check for collision
             // Y axis
-            if (world.getBlockFromPosition(position.add(new Vector3f(0, step.y, 0), new Vector3f())) != null) {
-                position.y = (float) ((step.y < 0) ? Math.floor(position.y) : Math.ceil(position.y));
+            if (world.getBlockFromPosition(position.add(new Vector3f(0, step.y, 0), new Vector3f())) != null ||
+                    world.getBlockFromPosition(position.add(new Vector3f(0, step.y - 1.5f, 0), new Vector3f())) != null) {
+                position.y = (float) ((step.y < 0) ? Math.floor(position.y) + .5f : Math.ceil(position.y));
                 isAirborne = false;
                 velocity.y = 0;
             } else {
                 position.y = position.y + step.y;
+                isAirborne = true;
             }
-            if (world.getBlockFromPosition(position.add(new Vector3f(step.x, 0, 0), new Vector3f())) != null) {
+            if (world.getBlockFromPosition(position.add(new Vector3f(step.x, 0, 0), new Vector3f())) != null ||
+                    world.getBlockFromPosition(position.add(new Vector3f(step.x, -1.5f, 0), new Vector3f())) != null) {
                 position.x = (float) ((step.x < 0) ? Math.floor(position.x) : Math.ceil(position.x));
                 velocity.x = 0;
             } else {
                 position.x = position.x + step.x;
             }
-            if (world.getBlockFromPosition(position.add(new Vector3f(0, 0, step.z), new Vector3f())) != null) {
+            if (world.getBlockFromPosition(position.add(new Vector3f(0, 0, step.z), new Vector3f())) != null ||
+                    world.getBlockFromPosition(position.add(new Vector3f(0, -1.5f, step.z), new Vector3f())) != null) {
                 position.z = (float) ((step.z < 0) ? Math.floor(position.z) : Math.ceil(position.z));
                 velocity.z = 0;
             } else {

@@ -151,7 +151,7 @@ public class App {
             }
         }
 
-        world.camera.position.y = 51f;
+        world.camera.position.y = 55f;
 
 //        World world = WorldManager.importWorld(this);
 

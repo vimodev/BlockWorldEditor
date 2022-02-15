@@ -175,14 +175,9 @@ public class App {
             }
 
             nvgBeginFrame(vg, WINDOW_WIDTH, WINDOW_HEIGHT, contentScaleY);
-
-            
-            // Rotate sun for day/night cycle
-            world.dirLight.position.rotateX((float) dt * 0.2f).normalize();
-            world.dirLight.position.rotateZ((float) dt * 0.1f).normalize();
             
             // Apply input to the world or command line
-            if (!CommandLine.show) world.applyInput(this, dt);
+            if (!CommandLine.show) world.tick(this, dt);
             else CommandLine.processInput();
 
             // Render the world
@@ -230,6 +225,12 @@ public class App {
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
         nvgText(vg, 10, 65, "dir: " + world.camera.getDirection());
+        // Time
+        nvgBeginPath(vg);
+        nvgFontSize(vg, 15);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
+        nvgText(vg, 10, 80, "time: " + String.format("%.0f (%.0f/s)",  world.time, world.timeRate));
 
         // Render crosshair
         int crossHairLength = 35;
@@ -262,6 +263,8 @@ public class App {
             h.append("export    Exports current world to file\n");
             h.append("wireframe <on/off>    Toggle wireframe rendering\n");
             h.append("vsync <on/off>    Toggle vsync\n");
+            h.append("time <time>    Set time to <time> [0,2399]\n");
+            h.append("time rate <rate>    Set time rate to <rate> [0,-]\n");
             JOptionPane.showMessageDialog(new JDialog(), h.toString());
         } else if (command.equals("import")) {
             world = WorldManager.importWorld(this);
@@ -273,6 +276,20 @@ public class App {
         } else if (command.startsWith("vsync")) {
             if (command.equals("vsync off")) glfwSwapInterval(0);
             else if (command.equals("vsync on")) glfwSwapInterval(1);
+        } else if (command.startsWith("time")) {
+            if (command.startsWith("time rate")) {
+                String[] split = command.split(" ");
+                try {
+                    int rateValue = Integer.parseInt(split[split.length - 1]);
+                    if (rateValue >= 0 && rateValue < 2400) world.timeRate = rateValue;
+                } catch (NumberFormatException e) {};
+            } else {
+                String[] split = command.split(" ");
+                try {
+                    int timeValue = Integer.parseInt(split[split.length - 1]);
+                    if (timeValue >= 0 && timeValue < 2400) world.time = timeValue;
+                } catch (NumberFormatException e) {};
+            }
         }
         fps.dt();
     }

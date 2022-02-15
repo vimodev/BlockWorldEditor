@@ -22,11 +22,14 @@ public class World {
 
     public Vector3f skyColor;
 
+    public float time = 1200f;
+    public float timeRate = 50f;
+
     // Directional light (e.g. the sun)
     public Light dirLight = new Light(
             new Vector3f(0f,-1f,0f),
             new Vector3f(0.1f, 0.1f, 0.1f),
-            new Vector3f(0.4f, 0.35f, 0.35f),
+            new Vector3f(0.8f, 0.7f, 0.7f),
             new Vector3f(0.1f, 0.1f, 0.1f)
     );
     // All point lights (e.g. light blocks, torches)
@@ -97,7 +100,14 @@ public class World {
         chunk.setBlock(x, y, z, block);
     }
 
-    public void applyInput(App app, double dt) {
+    public void tick(App app, double dt) {
+        // Apply time for day night cycle
+        time += timeRate * (float) dt;
+        if (time >= 2400f) time -= 2400f;
+        // Reposition sun based on time
+        dirLight.position = new Vector3f(0, 1, 0);
+        dirLight.position.rotateX((time / 2400f) * 2 * (float) Math.PI);
+
         if (InputController.keyPressed(GLFW_KEY_F)) {
             flying = !flying;
         }

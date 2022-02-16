@@ -171,6 +171,7 @@ public class App {
             if (InputController.keyPressed(GLFW_KEY_ENTER)) {
                 if (CommandLine.show) executeCommand(CommandLine.content);
                 CommandLine.show = !CommandLine.show;
+                CommandLine.historyIndex = -1;
                 CommandLine.content = "";
             }
 
@@ -255,13 +256,14 @@ public class App {
     public void executeCommand(String command) {
         command = command.trim().toLowerCase();
         if (command.length() == 0) return;
-        System.out.println("Running command: " + command);
+        CommandLine.history.add(command);
         if (command.equals("help")) {
             StringBuilder h = new StringBuilder();
             h.append("HELP\n");
             h.append("import    Imports a saved world from file.\n");
             h.append("export    Exports current world to file\n");
-            h.append("wireframe <on/off>    Toggle wireframe rendering\n");
+            h.append("render wireframe <on/off>    Toggle wireframe rendering\n");
+            h.append("render distance <distance>    Set render distance [0,-]\n");
             h.append("vsync <on/off>    Toggle vsync\n");
             h.append("time <time>    Set time to <time> [0,2399]\n");
             h.append("time rate <rate>    Set time rate to <rate> [0,-]\n");
@@ -270,9 +272,16 @@ public class App {
             world = WorldManager.importWorld(this);
         } else if (command.equals("export")) {
             WorldManager.exportWorld(world);
-        } else if (command.startsWith("wireframe")) {
-            if (command.equals("wireframe on")) wireframe = true;
-            else if (command.equals("wireframe off")) wireframe = false;
+        } else if (command.startsWith("render")) {
+            if (command.equals("render wireframe on")) wireframe = true;
+            else if (command.equals("render wireframe off")) wireframe = false;
+            else if (command.startsWith("render distance")) {
+                String[] split = command.split(" ");
+                try {
+                    int dist = Integer.parseInt(split[split.length - 1]);
+                    if (dist >= 0) Renderer.RENDER_DISTANCE = dist;
+                } catch (NumberFormatException e) {};
+            }
         } else if (command.startsWith("vsync")) {
             if (command.equals("vsync off")) glfwSwapInterval(0);
             else if (command.equals("vsync on")) glfwSwapInterval(1);

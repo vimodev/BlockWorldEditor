@@ -1,6 +1,8 @@
 import org.lwjgl.nanovg.NVGColor;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.lwjgl.nanovg.NanoVG.*;
 
@@ -13,6 +15,8 @@ public class CommandLine {
 
     // Current content of command line
     static String content = "";
+    static List<String> history = new ArrayList<>();
+    static int historyIndex = -1;
     // Is it shown
     static boolean show = false;
 
@@ -45,9 +49,29 @@ public class CommandLine {
      * used for example for backspace functionality
      */
     static void processInput() {
+        // Remove character
         if (InputController.keyPressed(GLFW_KEY_BACKSPACE)) {
             if (content.length() > 0) {
                 content = content.substring(0, content.length() - 1);
+            }
+        }
+        // Browse history
+        if (InputController.keyPressed(GLFW_KEY_UP)) {
+            if (historyIndex == -1 && !history.isEmpty()) {
+                historyIndex = history.size() - 1;
+                content = history.get(historyIndex);
+            } else if (historyIndex > 0) {
+                historyIndex--;
+                content = history.get(historyIndex);
+            }
+        }
+        if (InputController.keyPressed(GLFW_KEY_DOWN)) {
+            if (historyIndex < history.size() - 1 && historyIndex != -1) {
+                historyIndex++;
+                content = history.get(historyIndex);
+            } else if (historyIndex == history.size() - 1) {
+                historyIndex = -1;
+                content = "";
             }
         }
     }

@@ -23,7 +23,9 @@ public class World {
     public float timeRate = 50f;
 
     public Vector3f select1;
+    public Block select1Block;
     public Vector3f select2;
+    public Block select2Block;
 
     // Directional light (e.g. the sun)
     public Light dirLight = new Light(
@@ -75,7 +77,7 @@ public class World {
                 return chunk;
             }
         }
-        Chunk chunk = new Chunk(floorX, 0, floorZ);
+        Chunk chunk = new Chunk(this, floorX, 0, floorZ);
         chunks.add(chunk);
         return chunk;
     }
@@ -183,11 +185,23 @@ public class World {
 
         if (InputController.keyPressed(GLFW_KEY_1)) {
             Block block = camera.getBlockAtCrosshair(app, this, 100f);
-            if (block != null) select1 = new Vector3f(block.position);
+            if (block != null) {
+                select1 = new Vector3f(block.position);
+                Block previous = select1Block;
+                select1Block = block;
+                if (previous != null) previous.chunk.regenerateMesh();
+                block.chunk.regenerateMesh();
+            }
         }
         if (InputController.keyPressed(GLFW_KEY_2)) {
             Block block = camera.getBlockAtCrosshair(app, this, 100f);
-            if (block != null) select2 = new Vector3f(block.position);
+            if (block != null) {
+                select2 = new Vector3f(block.position);
+                Block previous = select2Block;
+                select2Block = block;
+                if (previous != null) previous.chunk.regenerateMesh();
+                block.chunk.regenerateMesh();
+            }
         }
 
         if (flying) {

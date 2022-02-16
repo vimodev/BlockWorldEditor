@@ -17,6 +17,8 @@ public class Chunk {
     public static final int WIDTH = 32;
     public static final int HEIGHT = 256;
 
+    public World world;
+
     // 3d grid of blocks: x z y
     public Block[][][] blocks;
     // Origin of the chunk in the world
@@ -33,7 +35,8 @@ public class Chunk {
     public int vertexCount;
     private List<Integer> vbos;
 
-    public Chunk(int x, int y, int z) {
+    public Chunk(World world, int x, int y, int z) {
+        this.world = world;
         this.origin = new Vector3i(x, y, z);
         this.blocks = new Block[WIDTH][WIDTH][HEIGHT];
         this.vbos = new ArrayList<>();
@@ -160,6 +163,9 @@ public class Chunk {
             // Calculate texture based on block type
             float inc = (float) Block.increment / (float) Block.size;
             Vector2f leftTop = new Vector2f(inc * Block.textureLocation.get(block.type).x, inc * Block.textureLocation.get(block.type).y);
+            if (block == world.select1Block || block == world.select2Block) {
+                leftTop = new Vector2f(inc * Block.selectTextureLocation.x, inc * Block.selectTextureLocation.y);
+            }
             // Go over all faces that need drawing
             for (int f = 0; f < 6; f++) {
                 if (!block.faces[f]) continue;

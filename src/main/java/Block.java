@@ -58,6 +58,7 @@ public class Block {
             BlockType.SAND, new Vector2i(2, 1),
             BlockType.WOOL_WHITE, new Vector2i(0, 4)
     );
+    static final Vector2i selectTextureLocation = new Vector2i(9, 1);
 
     public Vector3f position;
     public BlockType type;

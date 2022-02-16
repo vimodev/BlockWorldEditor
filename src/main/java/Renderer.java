@@ -1,5 +1,7 @@
 import org.joml.Vector2f;
+import org.joml.Vector2i;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
@@ -14,6 +16,7 @@ public class Renderer {
     public static Shader defaultShader = new DefaultShader();
 
     public static float RENDER_DISTANCE = 100f;
+    public static int numberRendered = 0;
 
     public static void render(World world) {
         // Enable depth testing
@@ -52,8 +55,14 @@ public class Renderer {
         }
 
         // Render each chunk's mesh
+        numberRendered = 0;
         for (Chunk c : world.chunks) {
+            // Chunks outside render distance dont need to be rendered
             if (new Vector2f(world.camera.position.x, world.camera.position.z).distance(new Vector2f(c.origin.x, c.origin.z)) > RENDER_DISTANCE) continue;
+            // Dont bother with empty chunks
+            if (c.first == null) continue;
+            // Otherwise we render the chunk
+            numberRendered++;
             shader.setUniform("transformationMatrix", c.getTransformationMatrix());
             GL30.glBindVertexArray(c.mesh);
             GL20.glEnableVertexAttribArray(0); // Vertices

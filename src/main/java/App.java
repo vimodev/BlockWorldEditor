@@ -212,46 +212,60 @@ public class App {
     public void renderUI(World world) {
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
+        int y = 20; int fontSize = 15;
         // Keybinds
         nvgBeginPath(vg);
-        nvgFontSize(vg, 15);
+        nvgFontSize(vg, fontSize);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
-        nvgText(vg, 10, 20, "ESC to quit, F to fly, 1/2 for selecting, ENTER to open command line, type 'help' for commands");
+        nvgText(vg, 10, y, "ESC to quit, F to fly, 1/2 for selecting, ENTER to open command line, type 'help' for commands");
+        y += 15;
         // FPS counter
         nvgBeginPath(vg);
-        nvgFontSize(vg, 15);
+        nvgFontSize(vg, fontSize);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
-        nvgText(vg, 10, 35, "fps: " + String.format("%.0f", fps.getFrequency()));
+        nvgText(vg, 10, y, "fps: " + String.format("%.0f", fps.getFrequency()));
+        y += 15;
+        // # Rendered chunks
+        nvgBeginPath(vg);
+        nvgFontSize(vg, fontSize);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
+        nvgText(vg, 10, y, "#chunks: " + Renderer.numberRendered);
+        y += 15;
         // Camera coordinates
         nvgBeginPath(vg);
-        nvgFontSize(vg, 15);
+        nvgFontSize(vg, fontSize);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
-        nvgText(vg, 10, 50, "pos: " + world.camera.position);
+        nvgText(vg, 10, y, "pos: " + world.camera.position);
+        y += 15;
         // Camera dir
         nvgBeginPath(vg);
-        nvgFontSize(vg, 15);
+        nvgFontSize(vg, fontSize);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
-        nvgText(vg, 10, 65, "dir: " + world.camera.getDirection());
+        nvgText(vg, 10, y, "dir: " + world.camera.getDirection());
+        y += 15;
         // Time
         nvgBeginPath(vg);
-        nvgFontSize(vg, 15);
+        nvgFontSize(vg, fontSize);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
-        nvgText(vg, 10, 80, "time: " + String.format("%.0f (%.0f/s)",  world.time, world.timeRate));
+        nvgText(vg, 10, y, "time: " + String.format("%.0f (%.0f/s)",  world.time, world.timeRate));
+        y += 15;
         // Selected block type
         nvgBeginPath(vg);
-        nvgFontSize(vg, 15);
+        nvgFontSize(vg, fontSize);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
         if (Toolbar.getSelectedBlock() != null) {
-            nvgText(vg, 10, 95, "holding block: " + Toolbar.getSelectedBlock().name());
+            nvgText(vg, 10, y, "holding block: " + Toolbar.getSelectedBlock().name());
         } else {
-            nvgText(vg, 10, 95, "holding block: ");
+            nvgText(vg, 10, y, "holding block: ");
         }
+        y += 15;
 
 
         // Render crosshair

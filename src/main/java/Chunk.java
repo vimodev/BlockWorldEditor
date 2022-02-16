@@ -28,12 +28,9 @@ public class Chunk {
     public Block[][][] blocks;
     // Origin of the chunk in the world
     public Vector3i origin;
-
-    // First block in the chunk
-    public Block first;
-    // Last block
-    public Block last;
-    // We use this chain of pointers for efficient iteration over all blocks
+    
+    // List of all blocks in the chunk, for easy iteration
+    List<Block> blockList;
 
     // VAO that holds current mesh
     public int mesh;
@@ -45,6 +42,7 @@ public class Chunk {
         this.origin = new Vector3i(x, y, z);
         this.blocks = new Block[WIDTH][WIDTH][HEIGHT];
         this.vbos = new ArrayList<>();
+        this.blockList = new ArrayList<>();
     }
 
     public Matrix4f getTransformationMatrix() {
@@ -66,18 +64,7 @@ public class Chunk {
     public Block removeBlock(int x, int y, int z) {
         Block block = blocks[x][z][y];
         if (block == null) return null;
-        if (block == first && block == last) {
-            first = null; last = null;
-        } else if (block == first) {
-            first = block.next;
-            block.next.previous = null;
-        } else if (block == last) {
-            last = block.previous;
-            block.previous.next = null;
-        } else {
-            block.next.previous = block.previous;
-            block.previous.next = block.next;
-        }
+        blockList.remove(block);
         blocks[x][z][y] = null;
         if (x - 1 >= 0 && blocks[x-1][z][y] != null) {
             blocks[x-1][z][y].faces[1] = true;
@@ -136,14 +123,8 @@ public class Chunk {
             block.faces[4] = false;
             blocks[x][z][y+1].faces[5] = false;
         }
-        // Update rendering chain
-        if (first == null) {
-            first = block; last = block;
-        } else {
-            last.next = block;
-            block.previous = last;
-            last = block;
-        }
+        // Add to list
+        blockList.add(block);
     }
 
     /**
@@ -163,8 +144,7 @@ public class Chunk {
         List<Float> textureCoords = new ArrayList<>();
         List<Float> normals = new ArrayList<>();
         // Go over all blocks
-        Block block = first;
-        while (block != null) {
+        for (Block block : blockList) {
             // Calculate texture based on block type
             float inc = (float) Block.increment / (float) Block.size;
             Vector2f leftTop = new Vector2f(inc * Block.textureLocation.get(block.type).x, inc * Block.textureLocation.get(block.type).y);
@@ -188,7 +168,6 @@ public class Chunk {
                     normals.add(Block.faceNormals[f][v * 3 + 2]);
                 }
             }
-            block = block.next;
         }
         vertexCount = positions.size() / 3;
         // And proceed to load all that data into gpu memory

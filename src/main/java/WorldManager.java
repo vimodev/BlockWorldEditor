@@ -141,14 +141,12 @@ public class WorldManager {
         Map<BlockType, JSONArray> blocksJSON = new HashMap<>();
         for (BlockType type : BlockType.values()) blocksJSON.put(type, new JSONArray());
         for (Chunk c : world.chunks) {
-            Block block = c.first;
-            while (block != null) {
+            for (Block block : c.blockList) {
                 JSONArray pos = new JSONArray();
                 pos.put(block.position.x);
                 pos.put(block.position.y);
                 pos.put(block.position.z);
                 blocksJSON.get(block.type).put(pos);
-                block = block.next;
             }
         }
         JSONObject blocks = new JSONObject();

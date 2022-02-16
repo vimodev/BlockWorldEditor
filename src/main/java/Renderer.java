@@ -60,7 +60,7 @@ public class Renderer {
             // Chunks outside render distance dont need to be rendered
             if (new Vector2f(world.camera.position.x, world.camera.position.z).distance(new Vector2f(c.origin.x, c.origin.z)) > RENDER_DISTANCE) continue;
             // Dont bother with empty chunks
-            if (c.first == null) continue;
+            if (c.blockList.isEmpty()) continue;
             // Otherwise we render the chunk
             numberRendered++;
             shader.setUniform("transformationMatrix", c.getTransformationMatrix());

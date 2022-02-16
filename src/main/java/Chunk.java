@@ -12,11 +12,16 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Block container with a single mesh
+ */
 public class Chunk {
 
+    // Chunk dimensions WIDTH x WIDTH x HEIGHT
     public static final int WIDTH = 32;
     public static final int HEIGHT = 256;
 
+    // Chunk parent world
     public World world;
 
     // 3d grid of blocks: x z y

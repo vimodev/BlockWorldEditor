@@ -1,30 +1,27 @@
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
-import org.joml.Vector4f;
 import org.json.JSONObject;
 import org.lwjgl.BufferUtils;
 
 import java.nio.DoubleBuffer;
-import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
 
-import static org.lwjgl.opengl.GL11.*;
 
 /**
  * Contains camera attributes and functionality
  */
 public class Camera {
 
-    // Properties of the camera
+    // Camera position in world space
     public Vector3f position = new Vector3f(0, 10, 3);
+    // Camera velocity in world space
     public Vector3f velocity = new Vector3f(0, 0, 0);
+    // Is camera currently airborne
     private boolean isAirborne = true;
+    // Camera's parent world
     public World world;
 
     // Projection properties of the camera
@@ -59,6 +56,11 @@ public class Camera {
         this.world = world;
     }
 
+    /**
+     * Try to apply the camera's current velocity
+     * and detect/correct collisions
+     * @param dt
+     */
     private void applyVelocity(double dt) {
         Vector3f step = velocity.mul((float) dt, new Vector3f());
         Vector3f next = position.add(step, new Vector3f());
@@ -223,15 +225,23 @@ public class Camera {
         return dir;
     }
 
+    /**
+     * Based on crosshair, cast a ray, and check where a new block
+     * would be placed
+     * @param app App instance
+     * @param world World instance
+     * @return world space coordinate of new block
+     */
     public Vector3f getBlockPlaceCoordinatesAtCrosshair(App app, World world) {
         Vector3f direction = getDirection();
         // March a ray until we hit a block
-        Chunk previous;
+        Chunk previous = null;
         Vector3i previousCoords = new Vector3i();
         for (float length = marchStep; length < clickRange; length += marchStep) {
             direction.normalize(length);
             Vector3f wp = position.add(direction, new Vector3f());
             Chunk chunk = world.getChunkFromPosition(wp);
+            if (previous == null) previous = chunk;
             int x = (int) Math.floor(wp.x) % Chunk.WIDTH;
             int y = (int) Math.floor(wp.y) % Chunk.HEIGHT;
             int z = (int) Math.floor(wp.z) % Chunk.WIDTH;
@@ -240,7 +250,7 @@ public class Camera {
             if (y < 0 || y >= Chunk.HEIGHT) return null;
             if (chunk.blocks[x][z][y] != null) {
                 // Backtrack to previous ray position and return
-                return new Vector3f(chunk.origin.x + previousCoords.x, chunk.origin.y + previousCoords.y, chunk.origin.z + previousCoords.z);
+                return new Vector3f(previous.origin.x + previousCoords.x, previous.origin.y + previousCoords.y, previous.origin.z + previousCoords.z);
             }
             previous = chunk;
             previousCoords = new Vector3i(x, y, z);
@@ -274,6 +284,10 @@ public class Camera {
         return null;
     }
 
+    /**
+     * Output this object to a JSON object
+     * @return
+     */
     public JSONObject toJSON() {
         JSONObject cameraJSON = new JSONObject();
         JSONObject cameraPosition = new JSONObject();

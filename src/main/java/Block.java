@@ -1,27 +1,15 @@
 import org.joml.*;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL14.GL_TEXTURE_LOD_BIAS;
-import static org.lwjgl.opengl.GL30.glGenVertexArrays;
-import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 /**
  * All types of blocks
@@ -60,18 +48,32 @@ public class Block {
             BlockType.SAND, new Vector2i(2, 1),
             BlockType.WOOL_WHITE, new Vector2i(0, 4)
     );
+    // A selected block has this texture coordinate
     static final Vector2i selectTextureLocation = new Vector2i(9, 1);
 
+    // Position of block in world space
     public Vector3f position;
+    // Type of block determines texture
     public BlockType type;
 
     // Chunk stuff
+    // Which faces are rendering
     public boolean[] faces;
+    // Block iteration pointers
     public Block previous;
     public Block next;
+    // Block position inside chunk
     public Vector3i positionInChunk;
+    // Parent chunk
     public Chunk chunk;
 
+    /**
+     * Create a block at position with type
+     * @param x coordinate
+     * @param y coordinate
+     * @param z coordinate
+     * @param type type of block
+     */
     public Block(float x, float y, float z, BlockType type) {
         this.position = new Vector3f(x, y, z);
         this.type = type;
@@ -81,7 +83,7 @@ public class Block {
 
     /**
      * Make transformation matrix from the Block's attributes
-     * @return
+     * @return 4d transformation matrix
      */
     public Matrix4f getTransformationMatrix() {
         Matrix4f M = new Matrix4f();
@@ -90,6 +92,7 @@ public class Block {
         return M;
     }
 
+    // Vertex positions per face
     static float[][] faceVertices = new float[][]{
             {1, 1, 0,    1, 0, 0,    0, 0, 0, // -z face
                     0, 0, 0,    0, 1, 0,    1, 1, 0},
@@ -104,6 +107,7 @@ public class Block {
             {0, 0, 0,    1, 0, 0,    1, 0, 1, // Bottom face
                     1, 0, 1,    0, 0, 1,    0, 0, 0}
     };
+    // Vertex normals per face
     static float[][] faceNormals = new float[][]{
             {0, 0, -1,   0, 0, -1,   0, 0, -1, // -z
                     0, 0, -1,   0, 0, -1,   0, 0, -1},

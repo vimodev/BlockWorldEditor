@@ -3,7 +3,6 @@ import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.nanovg.NVGColor;
-import org.lwjgl.nanovg.NanoVG;
 import org.lwjgl.opengl.GL;
 
 import javax.swing.*;
@@ -92,14 +91,17 @@ public class App {
         // Load Block model and texture
         Block.loadTexture();
 
+        // Hide the cursor
         glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
         // Nano VG stuff
         glEnable(GL_STENCIL_TEST);
+        // Create nano vg context
         vg = nvgCreate(NVG_ANTIALIAS | NVG_STENCIL_STROKES);
         if (vg == NULL) {
             throw new IllegalStateException("Failed to initialize NanoVG");
         }
+        // Get the content scaling factors
         FloatBuffer sx = BufferUtils.createFloatBuffer(1);
         FloatBuffer sy = BufferUtils.createFloatBuffer(1);
         glfwGetWindowContentScale(window.getWindow(), sx, sy);
@@ -175,6 +177,7 @@ public class App {
                 CommandLine.content = "";
             }
 
+            // All nano vg rendering must occur after this call
             nvgBeginFrame(vg, WINDOW_WIDTH, WINDOW_HEIGHT, contentScaleY);
             
             // Apply input to the world or command line
@@ -186,19 +189,26 @@ public class App {
             world.render();
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+            // Render the UI over the rest
             renderUI(world);
 
             if (accumulatedTime > 1) {
                 accumulatedTime -= 1;
             }
-            // Frame is ready
+
+            // All nano vg rendering must occur before this call
             nvgEndFrame(vg);
+            // Swap the front and back buffers
             glfwSwapBuffers(window.getWindow());
             glfwPollEvents();
         }
 
     }
 
+    /**
+     * Render the UI
+     * @param world world to fetch information from
+     */
     public void renderUI(World world) {
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
@@ -264,10 +274,17 @@ public class App {
         glEnable(GL_CULL_FACE);
     }
 
+    /**
+     * Attempt to execute the functionality of the given command
+     * @param command string command contents
+     */
     public void executeCommand(String command) {
+        // Clean input
         command = command.trim().toLowerCase();
         if (command.length() == 0) return;
+        // Note in history
         CommandLine.history.add(command);
+        // Help command lists all command and functionality
         if (command.equals("help")) {
             StringBuilder h = new StringBuilder();
             h.append("HELP\n");
@@ -280,12 +297,17 @@ public class App {
             h.append("time rate <rate>    Set time rate to <rate> [0,-]\n");
             JOptionPane.showMessageDialog(new JDialog(), h.toString());
         } else if (command.equals("import")) {
+            // Import a world from a file
             world = WorldManager.importWorld(this);
         } else if (command.equals("export")) {
+            // Export current world to a file
             WorldManager.exportWorld(world);
         } else if (command.startsWith("render")) {
+            // Edit rendering settings
+            // Wireframe toggle
             if (command.equals("render wireframe on")) wireframe = true;
             else if (command.equals("render wireframe off")) wireframe = false;
+            // Set render distance
             else if (command.startsWith("render distance")) {
                 String[] split = command.split(" ");
                 try {
@@ -294,8 +316,10 @@ public class App {
                 } catch (NumberFormatException e) {};
             }
         } else if (command.startsWith("vsync")) {
+            // Toggle vsync
             if (command.equals("vsync off")) glfwSwapInterval(0);
             else if (command.equals("vsync on")) glfwSwapInterval(1);
+            // Set time rate and value
         } else if (command.startsWith("time")) {
             if (command.startsWith("time rate")) {
                 String[] split = command.split(" ");
@@ -311,6 +335,7 @@ public class App {
                 } catch (NumberFormatException e) {};
             }
         } else if (command.startsWith("set")) {
+            // Set selection to given block type
             if (world.select1 != null & world.select2 != null) {
                 try {
                     String[] split = command.split(" ");
@@ -319,6 +344,7 @@ public class App {
                 } catch (IllegalArgumentException e) {};
             }
         } else if (command.startsWith("replace")) {
+            // Replace given blocktype with other blocktype in selection
             if (world.select1 != null & world.select2 != null) {
                 try {
                     String[] split = command.split(" ");
@@ -328,6 +354,7 @@ public class App {
                 } catch (IllegalArgumentException e) {};
             }
         } else if (command.equals("remove")) {
+            // Remove all blocks in selection
             if (world.select1 != null & world.select2 != null) {
                 world.removeBlocks(world.select1, world.select2);
             }

@@ -1,10 +1,7 @@
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -24,6 +21,9 @@ public class World {
 
     public float time = 1200f;
     public float timeRate = 50f;
+
+    public Vector3f select1;
+    public Vector3f select2;
 
     // Directional light (e.g. the sun)
     public Light dirLight = new Light(
@@ -100,6 +100,58 @@ public class World {
         chunk.setBlock(x, y, z, block);
     }
 
+    public void removeBlocks(Vector3f p1, Vector3f p2) {
+        Set<Chunk> affectedChunks = new HashSet<>();
+        for (float x = Math.min(p1.x, p2.x); x <= Math.max(p1.x, p2.x); x++) {
+            for (float y = Math.min(p1.y, p2.y); y <= Math.max(p1.y, p2.y); y++) {
+                for (float z = Math.min(p1.z, p2.z); z <= Math.max(p1.z, p2.z); z++) {
+                    Block block = getBlockFromPosition(new Vector3f(x, y, z));
+                    if (block != null) {
+                        Chunk c = getChunkFromPosition(new Vector3f(x, y, z));
+                        c.removeBlock(block.positionInChunk.x, block.positionInChunk.y, block.positionInChunk.z);
+                        affectedChunks.add(c);
+                    }
+                }
+            }
+        }
+        for (Chunk c : affectedChunks) c.regenerateMesh();
+    }
+
+    public void replaceBlocks(Vector3f p1, Vector3f p2, BlockType oType, BlockType nType) {
+        Set<Chunk> affectedChunks = new HashSet<>();
+        for (float x = Math.min(p1.x, p2.x); x <= Math.max(p1.x, p2.x); x++) {
+            for (float y = Math.min(p1.y, p2.y); y <= Math.max(p1.y, p2.y); y++) {
+                for (float z = Math.min(p1.z, p2.z); z <= Math.max(p1.z, p2.z); z++) {
+                    Block block = getBlockFromPosition(new Vector3f(x, y, z));
+                    if (block != null && block.type == oType) {
+                        block.type = nType;
+                        affectedChunks.add(block.chunk);
+                    }
+                }
+            }
+        }
+        for (Chunk c : affectedChunks) c.regenerateMesh();
+    }
+
+    public void setBlocks(Vector3f p1, Vector3f p2, BlockType type) {
+        Set<Chunk> affectedChunks = new HashSet<>();
+        for (float x = Math.min(p1.x, p2.x); x <= Math.max(p1.x, p2.x); x++) {
+            for (float y = Math.min(p1.y, p2.y); y <= Math.max(p1.y, p2.y); y++) {
+                for (float z = Math.min(p1.z, p2.z); z <= Math.max(p1.z, p2.z); z++) {
+                    Block block = getBlockFromPosition(new Vector3f(x, y, z));
+                    if (block != null) {
+                        block.type = type;
+                    } else {
+                        block = new Block((float) Math.floor(x), (float) Math.floor(y), (float) Math.floor(z), type);
+                        addBlock(block);
+                    }
+                    affectedChunks.add(block.chunk);
+                }
+            }
+        }
+        for (Chunk c : affectedChunks) c.regenerateMesh();
+    }
+
     public void tick(App app, double dt) {
         // Apply time for day night cycle
         time += timeRate * (float) dt;
@@ -113,7 +165,7 @@ public class World {
         }
 
         if (InputController.primaryMouseClicked()) {
-            Block block = camera.getBlockAtCrosshair(app, this);
+            Block block = camera.getBlockAtCrosshair(app, this, camera.clickRange);
             if (block != null) {
                 Chunk c = block.chunk;
                 c.removeBlock(block.positionInChunk.x, block.positionInChunk.y, block.positionInChunk.z);
@@ -127,6 +179,15 @@ public class World {
                 addBlock(new Block(loc.x, loc.y, loc.z, Toolbar.getSelectedBlock()));
                 getChunkFromPosition(loc).regenerateMesh();
             }
+        }
+
+        if (InputController.keyPressed(GLFW_KEY_1)) {
+            Block block = camera.getBlockAtCrosshair(app, this, 100f);
+            if (block != null) select1 = new Vector3f(block.position);
+        }
+        if (InputController.keyPressed(GLFW_KEY_2)) {
+            Block block = camera.getBlockAtCrosshair(app, this, 100f);
+            if (block != null) select2 = new Vector3f(block.position);
         }
 
         if (flying) {

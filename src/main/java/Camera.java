@@ -59,48 +59,6 @@ public class Camera {
         this.world = world;
     }
 
-    private static boolean isAabbCollision(Vector3f bo, Vector3f bd, Block block) {
-        Vector3f p = new Vector3f(block.position);
-        return (
-                        bo.x        < p.x + 1   &&
-                        bo.x + bd.x > p.x       &&
-                        bo.y        < p.y + 1   &&
-                        bo.y + bd.y > p.y       &&
-                        bo.z        < p.z + 1   &&
-                        bo.z + bd.z > p.z
-                );
-    }
-
-    private static Vector3f getAabbDistance(Vector3f bo, Vector3f bd, Block block) {
-        Vector3f delta = new Vector3f(0);
-        Vector3f p = new Vector3f(block.position);
-        if (bo.x < p.x)         delta.x = p.x - (bo.x + bd.x);
-        else if (p.x > bo.x)    delta.x = bo.x - (p.x + 1);
-        if (bo.y < p.y)         delta.y = p.y - (bo.y + bd.y);
-        else if (p.y > bo.y)    delta.y = bo.y - (p.y + 1);
-        if (bo.z < p.z)         delta.z = p.z - (bo.z + bd.z);
-        else if (p.z > bo.z)    delta.z = bo.z - (p.z + 1);
-        return delta;
-    }
-
-    private void collisionCheck(Vector3f bo, Vector3f bd) {
-        List<Block> candidates = new ArrayList<>();
-        for (float dx = -1; dx < bd.x + 1; dx++) {
-            for (float dy = -1; dy < bd.y + 1; dy++) {
-                for (float dz = -1; dz < bd.z + 1; dz++) {
-                    Block block = world.getBlockFromPosition(new Vector3f(
-                            bo.x + dx, bo.y + dy, + bo.z + dz
-                    ));
-                    if (block != null && !candidates.contains(block)) candidates.add(block);
-                }
-            }
-        }
-        if (candidates.isEmpty()) return;
-        for (Block candidate : candidates) {
-            if (isAabbCollision(bo, bd, candidate)) System.out.println("colliding");
-        }
-    }
-
     private void applyVelocity(double dt) {
         Vector3f step = velocity.mul((float) dt, new Vector3f());
         Vector3f next = position.add(step, new Vector3f());
@@ -296,10 +254,10 @@ public class Camera {
      * @param world
      * @return
      */
-    public Block getBlockAtCrosshair(App app, World world) {
+    public Block getBlockAtCrosshair(App app, World world, float range) {
         Vector3f direction = getDirection();
         // March a ray until we hit a block
-        for (float length = marchStep; length < clickRange; length += marchStep) {
+        for (float length = marchStep; length < range; length += marchStep) {
             direction.normalize(length);
             Vector3f wp = position.add(direction, new Vector3f());
             Chunk chunk = world.getChunkFromPosition(wp);

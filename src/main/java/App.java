@@ -207,7 +207,7 @@ public class App {
         nvgFontSize(vg, 15);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
-        nvgText(vg, 10, 20, "ESC to quit, F to fly, ENTER to open command line, type 'help' for commands");
+        nvgText(vg, 10, 20, "ESC to quit, F to fly, 1/2 for selecting, ENTER to open command line, type 'help' for commands");
         // FPS counter
         nvgBeginPath(vg);
         nvgFontSize(vg, 15);
@@ -232,6 +232,17 @@ public class App {
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
         nvgText(vg, 10, 80, "time: " + String.format("%.0f (%.0f/s)",  world.time, world.timeRate));
+        // Selected block type
+        nvgBeginPath(vg);
+        nvgFontSize(vg, 15);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
+        if (Toolbar.getSelectedBlock() != null) {
+            nvgText(vg, 10, 95, "holding block: " + Toolbar.getSelectedBlock().name());
+        } else {
+            nvgText(vg, 10, 95, "holding block: ");
+        }
+
 
         // Render crosshair
         int crossHairLength = 35;
@@ -298,6 +309,27 @@ public class App {
                     int timeValue = Integer.parseInt(split[split.length - 1]);
                     if (timeValue >= 0 && timeValue < 2400) world.time = timeValue;
                 } catch (NumberFormatException e) {};
+            }
+        } else if (command.startsWith("set")) {
+            if (world.select1 != null & world.select2 != null) {
+                try {
+                    String[] split = command.split(" ");
+                    BlockType type = BlockType.valueOf(split[1].toUpperCase());
+                    world.setBlocks(world.select1, world.select2, type);
+                } catch (IllegalArgumentException e) {};
+            }
+        } else if (command.startsWith("replace")) {
+            if (world.select1 != null & world.select2 != null) {
+                try {
+                    String[] split = command.split(" ");
+                    BlockType oType = BlockType.valueOf(split[1].toUpperCase());
+                    BlockType nType = BlockType.valueOf(split[2].toUpperCase());
+                    world.replaceBlocks(world.select1, world.select2, oType, nType);
+                } catch (IllegalArgumentException e) {};
+            }
+        } else if (command.equals("remove")) {
+            if (world.select1 != null & world.select2 != null) {
+                world.removeBlocks(world.select1, world.select2);
             }
         }
         fps.dt();

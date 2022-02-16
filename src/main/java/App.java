@@ -140,21 +140,21 @@ public class App {
         float offset = 0;
         for (BlockType type : BlockType.values()) {
             for (int i = 0; i < 1000; i++) {
-                world.addBlock(new Block(offset, 50f, i * -2.0f, type));
+                world.addBlock(new Block(offset, 15f, i * -2.0f, type));
             }
             offset += 2.0f;
         }
-        for (int x = -50; x < 50; x++) {
-            for (int z = -50; z < 50; z++) {
-                for (int y = 0; y < 50; y++) {
-                    world.addBlock(new Block(x, y, z, BlockType.STONE));
+        for (int x = -150; x < 150; x++) {
+            for (int z = -150; z < 150; z++) {
+                for (int y = 0; y < 15; y++) {
+                    if (y < 10) world.addBlock(new Block(x, y, z, BlockType.STONE));
+                    else if (y < 14) world.addBlock(new Block(x, y, z, BlockType.DIRT));
+                    else world.addBlock(new Block(x, y, z, BlockType.GRASS));
                 }
             }
         }
 
         world.camera.position.y = 55f;
-
-//        World world = WorldManager.importWorld(this);
 
         // After editing all the chunks, we generate their mesh
         for (Chunk c : world.chunks) c.regenerateMesh();

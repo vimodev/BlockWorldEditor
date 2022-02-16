@@ -28,7 +28,7 @@ public class Chunk {
     public Block[][][] blocks;
     // Origin of the chunk in the world
     public Vector3i origin;
-    
+
     // List of all blocks in the chunk, for easy iteration
     List<Block> blockList;
 

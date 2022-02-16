@@ -3,13 +3,15 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.swing.*;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Manages imports / exports of worlds
@@ -22,14 +24,35 @@ public class WorldManager {
      * @return
      */
     static World importWorld(App app) {
+        // Ask user which file to output to
         File file = promptFileLocation();
         String result = "";
         try {
-            result = Files.readString(file.toPath());
+            // Make a temporary directory to extract to
+            Path extractDir = Files.createTempDirectory("blockworldeditor");
+            extractDir.toFile().deleteOnExit();
+            // Read the zip and extract the first file
+            byte[] buffer = new byte[1024];
+            ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
+            ZipEntry zipEntry = zis.getNextEntry();
+            File newFile = new File(extractDir.toFile(), zipEntry.getName());
+            newFile.deleteOnExit();
+            FileOutputStream fos = new FileOutputStream(newFile);
+            int len;
+            while ((len = zis.read(buffer)) > 0) {
+                fos.write(buffer, 0, len);
+            }
+            fos.close();
+            // Read the file contents
+            result = Files.readString(newFile.toPath());
+            zis.closeEntry();
+            zis.close();
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
         if (result == "") return null;
+        // Parse json
         JSONObject worldJSON = new JSONObject(result);
         World world = new World(app);
         // Set camera state
@@ -95,7 +118,7 @@ public class WorldManager {
         File file = promptFileLocation();
         try {
             return exportToFile(world, file);
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
@@ -109,6 +132,7 @@ public class WorldManager {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fileChooser.setCurrentDirectory(new java.io.File(System.getProperty("user.home")));
+        fileChooser.setFileFilter(new FileNameExtensionFilter("BlockWorldEditor files", "bwe"));
         int result = fileChooser.showOpenDialog(new JDialog());
         if (result != JFileChooser.APPROVE_OPTION) {
             System.exit(1);
@@ -123,7 +147,7 @@ public class WorldManager {
      * @return
      * @throws FileNotFoundException
      */
-    static File exportToFile(World world, File file) throws FileNotFoundException {
+    static File exportToFile(World world, File file) throws IOException {
         JSONObject worldJSON = new JSONObject();
         // Export camera state to json
         JSONObject cameraJSON = world.camera.toJSON();
@@ -155,10 +179,26 @@ public class WorldManager {
         }
         worldJSON.put("blocks", blocks);
         // Write to file
-        try (PrintWriter out = new PrintWriter(file)) {
+        File tempFile = new File(file + ".json");
+        try (PrintWriter out = new PrintWriter(tempFile)) {
             out.print(worldJSON);
         }
-        return null;
+        // Apply zip to compress
+        file = new File(file + ".bwe");
+        FileOutputStream fos = new FileOutputStream(file);
+        ZipOutputStream zipOut = new ZipOutputStream(fos);
+        FileInputStream fis = new FileInputStream(tempFile);
+        ZipEntry zipEntry = new ZipEntry(tempFile.getName());
+        zipOut.putNextEntry(zipEntry);
+        byte[] bytes = new byte[1024]; int length;
+        while((length = fis.read(bytes)) >= 0) {
+            zipOut.write(bytes, 0, length);
+        }
+        zipOut.close();
+        fis.close();
+        fos.close();
+        tempFile.delete();
+        return file;
     }
 
 }

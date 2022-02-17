@@ -318,6 +318,7 @@ public class App {
             h.append("replace <old_type> <type>    Set selection <old_type> to <type>\n");
             h.append("remove    Remove selection blocks\n");
             h.append("sphere <r> <type>    Spawn sphere of <type> with radius <r> at selection 1\n");
+            h.append("line <type>    Trace line from selection 1 to selection 2\n");
             JOptionPane.showMessageDialog(new JDialog(), h.toString());
         } else if (command.equals("import")) {
             // Import a world from a file
@@ -388,6 +389,14 @@ public class App {
                     int r = Integer.parseInt(split[1]);
                     BlockType type = BlockType.valueOf(split[2].toUpperCase());
                     world.setSphere(world.select1, r, type);
+                } catch (IllegalArgumentException e) {};
+            }
+        } else if (command.startsWith("line")) {
+            if (world.select1 != null & world.select2 != null) {
+                try {
+                    String[] split = command.split(" ");
+                    BlockType type = BlockType.valueOf(split[1].toUpperCase());
+                    world.setLine(world.select1, world.select2, type);
                 } catch (IllegalArgumentException e) {};
             }
         }

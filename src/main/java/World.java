@@ -181,6 +181,34 @@ public class World {
         for (Chunk c : affectedChunks) c.regenerateMesh();
     }
 
+    /**
+     * Trace a line from p1 to p2 and set to type t
+     * @param p1
+     * @param p2
+     * @param t
+     */
+    public void setLine(Vector3f p1, Vector3f p2, BlockType t) {
+        Set<Chunk> affectedChunks = new HashSet<>();
+        Vector3f ray = p1.sub(p2, new Vector3f());
+        float distance = ray.length();
+        ray.normalize(0.1f);
+        Vector3f step = new Vector3f(ray);
+        while (ray.length() <= distance) {
+            Vector3f p = p2.add(ray, new Vector3f());
+            Block b = getBlockFromPosition(p);
+            if (b == null) {
+                p.floor();
+                b = new Block(p.x, p.y, p.z, t);
+                addBlock(b);
+            } else {
+                b.type = t;
+            }
+            affectedChunks.add(b.chunk);
+            ray.add(step);
+        }
+        for (Chunk c : affectedChunks) c.regenerateMesh();
+    }
+
     public void tick(App app, double dt) {
         // Apply time for day night cycle
         time += timeRate * (float) dt;

@@ -60,6 +60,8 @@ public class App {
         }
         // Get the resolution of the primary monitor
         GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        // Enable multi sample buffer
+        glfwWindowHint(GLFW_SAMPLES, 8er);
         // Create the game window
         window = new Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
         // Center the window

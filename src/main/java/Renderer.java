@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL30;
 import static org.lwjgl.opengl.GL11.*;
 
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
 
 public class Renderer {
 
@@ -19,6 +20,8 @@ public class Renderer {
     public static int numberRendered = 0;
 
     public static void render(World world) {
+        // Enable antialiasing
+        glEnable(GL_MULTISAMPLE);
         // Enable depth testing
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_LEQUAL);

@@ -19,8 +19,8 @@ public class World {
 
     public Vector3f skyColor;
 
-    public float time = 1200f;
-    public float timeRate = 50f;
+    public float time = 800f;
+    public float timeRate = 15f;
 
     public Vector3f select1;
     public Block select1Block;

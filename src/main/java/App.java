@@ -318,7 +318,7 @@ public class App {
             h.append("set <type>    Set selection to <type>\n");
             h.append("replace <old_type> <type>    Set selection <old_type> to <type>\n");
             h.append("remove    Remove selection blocks\n");
-            h.append("sphere <r> <type>    Spawn sphere of <type> with radius <r> at selection 1\n");
+            h.append("sphere <r> <type> [hollow]   Spawn sphere of <type> with radius <r> at selection 1\n");
             h.append("line <type>    Trace line from selection 1 to selection 2\n");
             JOptionPane.showMessageDialog(new JDialog(), h.toString());
         } else if (command.equals("import")) {
@@ -389,7 +389,7 @@ public class App {
                     String[] split = command.split(" ");
                     int r = Integer.parseInt(split[1]);
                     BlockType type = BlockType.valueOf(split[2].toUpperCase());
-                    world.setSphere(world.select1, r, type);
+                    world.setSphere(world.select1, r, type, command.contains("hollow"));
                 } catch (IllegalArgumentException e) {};
             }
         } else if (command.startsWith("line")) {

@@ -160,13 +160,14 @@ public class World {
      * @param r
      * @param t
      */
-    public void setSphere(Vector3f p, int r, BlockType t) {
+    public void setSphere(Vector3f p, int r, BlockType t, boolean hollow) {
         Set<Chunk> affectedChunks = new HashSet<>();
         for (float x = p.x - r; x < p.x + r; x++) {
             for (float z = p.z - r; z < p.z + r; z++) {
                 for (float y = p.y - r; y < p.y + r; y++) {
                     if (y < 0 || y > Chunk.HEIGHT - 1) continue;
                     if (p.distance((float) Math.floor(x), (float) Math.floor(y), (float) Math.floor(z)) > r) continue;
+                    if (hollow && p.distance((float) Math.floor(x), (float) Math.floor(y), (float) Math.floor(z)) < r - 1) continue;
                     Block block = getBlockFromPosition(new Vector3f(x, y, z));
                     if (block != null) {
                         block.type = t;

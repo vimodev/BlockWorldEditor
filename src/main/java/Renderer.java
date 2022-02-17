@@ -21,7 +21,7 @@ public class Renderer {
 
     public static void render(World world) {
         // Enable antialiasing
-        glEnable(GL_MULTISAMPLE);
+        glDisable(GL_MULTISAMPLE);
         // Enable depth testing
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_LEQUAL);

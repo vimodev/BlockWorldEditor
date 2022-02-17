@@ -110,13 +110,14 @@ public class App {
         contentScaleX = sx.get(0);
         contentScaleY = sy.get(0);
 
+        String prefix = System.getProperty("user.dir").startsWith("/") ? "/" : "" ;
         // Load font
         String path = this.getClass().getResource("OpenSans-Bold.ttf").getPath().toString().substring(1);
-        font = nvgCreateFont(vg, "sans", path);
+        font = nvgCreateFont(vg, "sans", prefix + path);
 
         // Load texture img for UI
         path = this.getClass().getResource("textures.png").getPath().toString().substring(1);
-        textureImg = nvgCreateImage(vg, path, NVG_IMAGE_NEAREST | NVG_IMAGE_PREMULTIPLIED);
+        textureImg = nvgCreateImage(vg, prefix + path, NVG_IMAGE_NEAREST | NVG_IMAGE_PREMULTIPLIED);
 
         // Initialize command line
         CommandLine.init();

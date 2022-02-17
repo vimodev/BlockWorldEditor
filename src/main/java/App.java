@@ -304,13 +304,20 @@ public class App {
         if (command.equals("help")) {
             StringBuilder h = new StringBuilder();
             h.append("HELP\n");
+            h.append("World Management:\n");
             h.append("import    Imports a saved world from file.\n");
             h.append("export    Exports current world to file\n");
+            h.append("Graphics:\n");
             h.append("render wireframe <on/off>    Toggle wireframe rendering\n");
             h.append("render distance <distance>    Set render distance [0,-]\n");
             h.append("vsync <on/off>    Toggle vsync\n");
+            h.append("Editing:\n");
             h.append("time <time>    Set time to <time> [0,2399]\n");
             h.append("time rate <rate>    Set time rate to <rate> [0,-]\n");
+            h.append("set <type>    Set selection to <type>\n");
+            h.append("replace <old_type> <type>    Set selection <old_type> to <type>\n");
+            h.append("remove    Remove selection blocks\n");
+            h.append("sphere <r> <type>    Spawn sphere of <type> with radius <r> at selection 1\n");
             JOptionPane.showMessageDialog(new JDialog(), h.toString());
         } else if (command.equals("import")) {
             // Import a world from a file
@@ -373,6 +380,15 @@ public class App {
             // Remove all blocks in selection
             if (world.select1 != null & world.select2 != null) {
                 world.removeBlocks(world.select1, world.select2);
+            }
+        } else if (command.startsWith("sphere")) {
+            if (world.select1 != null) {
+                try {
+                    String[] split = command.split(" ");
+                    int r = Integer.parseInt(split[1]);
+                    BlockType type = BlockType.valueOf(split[2].toUpperCase());
+                    world.setSphere(world.select1, r, type);
+                } catch (IllegalArgumentException e) {};
             }
         }
         fps.dt();

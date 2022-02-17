@@ -154,6 +154,33 @@ public class World {
         for (Chunk c : affectedChunks) c.regenerateMesh();
     }
 
+    /**
+     * Set a sphere of given blocktype at given coordinate
+     * @param p
+     * @param r
+     * @param t
+     */
+    public void setSphere(Vector3f p, int r, BlockType t) {
+        Set<Chunk> affectedChunks = new HashSet<>();
+        for (float x = p.x - r; x < p.x + r; x++) {
+            for (float z = p.z - r; z < p.z + r; z++) {
+                for (float y = p.y - r; y < p.y + r; y++) {
+                    if (y < 0 || y > Chunk.HEIGHT - 1) continue;
+                    if (p.distance((float) Math.floor(x), (float) Math.floor(y), (float) Math.floor(z)) > r) continue;
+                    Block block = getBlockFromPosition(new Vector3f(x, y, z));
+                    if (block != null) {
+                        block.type = t;
+                    } else {
+                        block = new Block((float) Math.floor(x), (float) Math.floor(y), (float) Math.floor(z), t);
+                        addBlock(block);
+                    }
+                    affectedChunks.add(block.chunk);
+                }
+            }
+        }
+        for (Chunk c : affectedChunks) c.regenerateMesh();
+    }
+
     public void tick(App app, double dt) {
         // Apply time for day night cycle
         time += timeRate * (float) dt;

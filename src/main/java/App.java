@@ -139,7 +139,7 @@ public class App {
     public void loop() {
 
         // Make a world instance with some blocks
-        world = new World(this);
+        world = new World(this, new FlatWorldGenerator(10, BlockType.STONE, 4, BlockType.DIRT, 1, BlockType.GRASS));
 
         // Generate some blocks of all types
         float offset = 0;
@@ -149,15 +149,15 @@ public class App {
             }
             offset += 2.0f;
         }
-        for (int x = -150; x < 150; x++) {
-            for (int z = -150; z < 150; z++) {
-                for (int y = 0; y < 15; y++) {
-                    if (y < 10) world.addBlock(new Block(x, y, z, BlockType.STONE));
-                    else if (y < 14) world.addBlock(new Block(x, y, z, BlockType.DIRT));
-                    else world.addBlock(new Block(x, y, z, BlockType.GRASS));
-                }
-            }
-        }
+//        for (int x = -150; x < 150; x++) {
+//            for (int z = -150; z < 150; z++) {
+//                for (int y = 0; y < 15; y++) {
+//                    if (y < 10) world.addBlock(new Block(x, y, z, BlockType.STONE));
+//                    else if (y < 14) world.addBlock(new Block(x, y, z, BlockType.DIRT));
+//                    else world.addBlock(new Block(x, y, z, BlockType.GRASS));
+//                }
+//            }
+//        }
 
         world.camera.position.y = 55f;
 
@@ -186,6 +186,9 @@ public class App {
             // Apply input to the world or command line
             if (!CommandLine.show) world.tick(this, dt);
             else CommandLine.processInput();
+
+            // Make sure chunks around the player are loaded by poking them
+            world.pokeChunks(Chunk.WIDTH * 3f);
 
             // Render the world
             if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

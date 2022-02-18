@@ -15,6 +15,7 @@ public class World {
 
     public Camera camera;
 
+    public WorldGenerator worldGenerator;
     public List<Chunk> chunks;
 
     public Vector3f skyColor;
@@ -39,32 +40,37 @@ public class World {
 
     public boolean flying = false;
 
+    public World(App app, WorldGenerator worldGenerator) {
+        this(app);
+        this.worldGenerator = worldGenerator;
+    }
+
     public World(App app) {
         this.app = app;
         skyColor = new Vector3f(0.2f, 0.6f, 0.8f);
         chunks = new ArrayList<>();
         camera = new Camera(this);
 
-        pointLights.add(new Light(
-                new Vector3f(0f, 52f, 3f),
-                new Vector3f(0.1f, 0.1f, 0.5f),
-                new Vector3f(0.1f, 0.1f, 0.4f),
-                new Vector3f(0.1f, 0.1f, 0.3f)
-        ));
-
-        pointLights.add(new Light(
-                new Vector3f(5f, 52f, 3f),
-                new Vector3f(0.5f, 0.1f, 0.1f),
-                new Vector3f(0.4f, 0.1f, 0.1f),
-                new Vector3f(0.3f, 0.1f, 0.1f)
-                ));
-
-        pointLights.add(new Light(
-                new Vector3f(10f, 52f, 3f),
-                new Vector3f(0.1f, 0.5f, 0.1f),
-                new Vector3f(0.1f, 0.4f, 0.1f),
-                new Vector3f(0.1f, 0.3f, 0.1f)
-        ));
+//        pointLights.add(new Light(
+//                new Vector3f(0f, 52f, 3f),
+//                new Vector3f(0.1f, 0.1f, 0.5f),
+//                new Vector3f(0.1f, 0.1f, 0.4f),
+//                new Vector3f(0.1f, 0.1f, 0.3f)
+//        ));
+//
+//        pointLights.add(new Light(
+//                new Vector3f(5f, 52f, 3f),
+//                new Vector3f(0.5f, 0.1f, 0.1f),
+//                new Vector3f(0.4f, 0.1f, 0.1f),
+//                new Vector3f(0.3f, 0.1f, 0.1f)
+//                ));
+//
+//        pointLights.add(new Light(
+//                new Vector3f(10f, 52f, 3f),
+//                new Vector3f(0.1f, 0.5f, 0.1f),
+//                new Vector3f(0.1f, 0.4f, 0.1f),
+//                new Vector3f(0.1f, 0.3f, 0.1f)
+//        ));
 
 
     }
@@ -79,7 +85,25 @@ public class World {
         }
         Chunk chunk = new Chunk(this, floorX, 0, floorZ);
         chunks.add(chunk);
+        if (worldGenerator != null) {
+            chunk = worldGenerator.generate(this, chunk);
+            chunk.regenerateMesh();
+        }
         return chunk;
+    }
+
+    /**
+     * 'pokes' all chunks within manhattan distance
+     * this can be used to generate all missing chunks in the distance from the camera
+     * @param distance
+     */
+    public void pokeChunks(float distance) {
+        Vector3f position = new Vector3f(camera.position);
+        for (float x = position.x - distance; x < position.x + distance; x += Chunk.WIDTH) {
+            for (float z = position.z - distance; z < position.z + distance; z += Chunk.WIDTH) {
+                getChunkFromPosition(new Vector3f(x, 0, z));
+            }
+        }
     }
 
     public Block getBlockFromPosition(Vector3f position) {

@@ -141,6 +141,7 @@ public class App {
         // Make a world instance with some blocks
 //        world = new World(this, new FlatWorldGenerator(10, BlockType.STONE, 4, BlockType.DIRT, 1, BlockType.GRASS));
         world = new World(this, new HillWorldGenerator(420, 30, 15, 100f));
+//        world = new World(this);
 
         // Make sure initial world is rendered, because spawning without chunks is bad
         int generating = world.generateChunksInRange((Renderer.RENDER_DISTANCE) + Chunk.WIDTH);

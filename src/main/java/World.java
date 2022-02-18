@@ -83,7 +83,8 @@ public class World {
                 return chunk;
             }
         }
-        return null;
+        Chunk chunk = new Chunk(this, floorX, 0, floorZ);
+        return chunk;
     }
 
     /**
@@ -108,8 +109,12 @@ public class World {
                 }
                 if (!chunkExists) {
                     Chunk chunk = new Chunk(this, floorX, 0, floorZ);
-                    worldGenerator.dispatch(this, chunk);
-                    generating++;
+                    if (worldGenerator != null) {
+                        worldGenerator.dispatch(this, chunk);
+                        generating++;
+                    } else {
+                        chunks.add(chunk);
+                    }
                 }
             }
         }

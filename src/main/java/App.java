@@ -142,6 +142,13 @@ public class App {
 //        world = new World(this, new FlatWorldGenerator(10, BlockType.STONE, 4, BlockType.DIRT, 1, BlockType.GRASS));
         world = new World(this, new HillWorldGenerator(420, 30, 15, 100f));
 
+        // Make sure initial world is rendered, because spawning without chunks is bad
+        int generating = world.generateChunksInRange((Renderer.RENDER_DISTANCE) + Chunk.WIDTH);
+        // Just loop disgustingly until all dispatches are done
+        while (world.chunks.size() < generating) {
+            world.gatherChunks();
+        }
+
         // Generate some blocks of all types
 //        float offset = 0;
 //        for (BlockType type : BlockType.values()) {
@@ -188,9 +195,6 @@ public class App {
             if (!CommandLine.show) world.tick(this, dt);
             else CommandLine.processInput();
 
-            // Make sure chunks around the player are loaded by poking them
-            world.pokeChunks((Renderer.RENDER_DISTANCE) + Chunk.WIDTH);
-
             // Render the world
             if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             world.render();
@@ -201,6 +205,9 @@ public class App {
 
             if (accumulatedTime > 1) {
                 accumulatedTime -= 1;
+                world.gatherChunks();
+                // Make sure chunks around the player are generated
+                world.generateChunksInRange((Renderer.RENDER_DISTANCE));
             }
 
             // All nano vg rendering must occur before this call
@@ -247,6 +254,17 @@ public class App {
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
         nvgText(vg, 10, y, "#chunks loaded: " + world.chunks.size());
+        y += 15;
+        // # Chunks currently generating
+        nvgBeginPath(vg);
+        nvgFontSize(vg, fontSize);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
+        if (world.worldGenerator != null) {
+            nvgText(vg, 10, y, "#chunks loading: " + world.worldGenerator.jobs.size());
+        } else {
+            nvgText(vg, 10, y, "#chunks loading: -");
+        }
         y += 15;
         // Camera coordinates
         nvgBeginPath(vg);

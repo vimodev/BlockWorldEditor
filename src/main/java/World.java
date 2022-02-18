@@ -83,27 +83,48 @@ public class World {
                 return chunk;
             }
         }
-        Chunk chunk = new Chunk(this, floorX, 0, floorZ);
-        chunks.add(chunk);
-        if (worldGenerator != null) {
-            chunk = worldGenerator.generate(this, chunk);
-            chunk.regenerateMesh();
-        }
-        return chunk;
+        return null;
     }
 
     /**
-     * 'pokes' all chunks within manhattan distance
-     * this can be used to generate all missing chunks in the distance from the camera
+     * Dispatch a chunk generation job for all unloaded chunks within distance
      * @param distance
+     * @return
      */
-    public void pokeChunks(float distance) {
+    public int generateChunksInRange(float distance) {
+        int generating = 0;
         Vector3f position = new Vector3f(camera.position);
         for (float x = position.x - distance; x < position.x + distance; x += Chunk.WIDTH) {
             for (float z = position.z - distance; z < position.z + distance; z += Chunk.WIDTH) {
-                getChunkFromPosition(new Vector3f(x, 0, z));
+                if (position.distance(x, position.y, z) > distance) continue;
+                int floorX = (int) Math.floor(x / Chunk.WIDTH) * Chunk.WIDTH;
+                int floorZ = (int) Math.floor(z / Chunk.WIDTH) * Chunk.WIDTH;
+                boolean chunkExists = false;
+                for (Chunk chunk : chunks) {
+                    if (chunk.origin.x == floorX && chunk.origin.z == floorZ) {
+                        chunkExists = true;
+                        break;
+                    }
+                }
+                if (!chunkExists) {
+                    Chunk chunk = new Chunk(this, floorX, 0, floorZ);
+                    worldGenerator.dispatch(this, chunk);
+                    generating++;
+                }
             }
         }
+        return generating;
+    }
+
+    /**
+     * Add all chunks that are done loading to the world
+     * and generate their mesh
+     */
+    public void gatherChunks() {
+        if (worldGenerator == null) return;
+        List<Chunk> results = worldGenerator.gather();
+        chunks.addAll(results);
+        for (Chunk c : results) c.regenerateMesh();
     }
 
     public Block getBlockFromPosition(Vector3f position) {

@@ -1,7 +1,7 @@
 /**
  * Generates flat chunks with the specified layers
  */
-public class FlatWorldGenerator implements WorldGenerator {
+public class FlatWorldGenerator extends WorldGenerator {
 
     public int l1; // Layer 1 thickness
     public BlockType l1t; // Layer 1 type
@@ -11,6 +11,7 @@ public class FlatWorldGenerator implements WorldGenerator {
     public BlockType l3t;
 
     public FlatWorldGenerator(int l1, BlockType l1t, int l2, BlockType l2t, int l3, BlockType l3t) {
+        super();
         this.l1 = l1;
         this.l1t = l1t;
         this.l2 = l2;

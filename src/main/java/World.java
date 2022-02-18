@@ -129,7 +129,7 @@ public class World {
         if (worldGenerator == null) return;
         List<Chunk> results = worldGenerator.gather();
         chunks.addAll(results);
-        for (Chunk c : results) c.regenerateMesh();
+        for (Chunk c : results) c.loadCalculatedMesh();
     }
 
     public Block getBlockFromPosition(Vector3f position) {

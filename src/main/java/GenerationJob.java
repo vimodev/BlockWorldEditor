@@ -18,6 +18,8 @@ public class GenerationJob implements Runnable {
     public void run() {
         // Generate the chunk
         generator.generate(world, chunk);
+        // Calculate the mesh
+        chunk.calculateMesh();
         // And add it to the 'done' queue
         generator.addChunkToQueue(chunk);
     }

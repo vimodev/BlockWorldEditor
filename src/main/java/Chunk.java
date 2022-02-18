@@ -33,9 +33,15 @@ public class Chunk {
     List<Block> blockList;
 
     // VAO that holds current mesh
+    public boolean meshReady;
     public int mesh;
     public int vertexCount;
     private List<Integer> vbos;
+
+    // Hold mesh data during the time between calculating and loading to gpu
+    private List<Float> positions;
+    private List<Float> textureCoords;
+    private List<Float> normals;
 
     public Chunk(World world, int x, int y, int z) {
         this.world = world;
@@ -43,6 +49,7 @@ public class Chunk {
         this.blocks = new Block[WIDTH][WIDTH][HEIGHT];
         this.vbos = new ArrayList<>();
         this.blockList = new ArrayList<>();
+        this.meshReady = false;
     }
 
     public Matrix4f getTransformationMatrix() {
@@ -128,21 +135,26 @@ public class Chunk {
     }
 
     /**
-     * Given all block data, create a single mesh for efficient rendering
+     * Unload any mesh belonging to this chunk from the gpu
      */
-    public void regenerateMesh() {
+    public void unloadMesh() {
         // Delete previous mesh
         GL30.glDeleteVertexArrays(mesh);
         for (int vbo : vbos) {
             GL30.glDeleteBuffers(vbo);
         }
         vbos.clear();
-        // Create a new one
-        mesh = GL30.glGenVertexArrays();
-        GL30.glBindVertexArray(mesh);
-        List<Float> positions = new ArrayList<>();
-        List<Float> textureCoords = new ArrayList<>();
-        List<Float> normals = new ArrayList<>();
+        meshReady = false;
+    }
+
+    /**
+     * Calculate all the mesh data, do not load into GPU yet,
+     * must be done by main thread
+     */
+    public void calculateMesh() {
+        positions = new ArrayList<>();
+        textureCoords = new ArrayList<>();
+        normals = new ArrayList<>();
         // Go over all blocks
         for (Block block : blockList) {
             // Calculate texture based on block type
@@ -170,8 +182,16 @@ public class Chunk {
             }
         }
         vertexCount = positions.size() / 3;
-        // And proceed to load all that data into gpu memory
-        // Positions
+    }
+
+    /**
+     * Load the calculated mesh into gpu memory
+     * DANGER!!!! MESH DATA MUST BE CALCULATED
+     */
+    public void loadCalculatedMesh() {
+        unloadMesh();
+        mesh = GL30.glGenVertexArrays();
+        GL30.glBindVertexArray(mesh);
         int vbo = GL15.glGenBuffers();
         vbos.add(vbo);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
@@ -207,6 +227,18 @@ public class Chunk {
 
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
         GL30.glBindVertexArray(0);
+        meshReady = true;
+        positions.clear();
+        normals.clear();
+        textureCoords.clear();
+    }
+
+    /**
+     * Given all block data, create a single mesh for efficient rendering
+     */
+    public void regenerateMesh() {
+        calculateMesh();
+        loadCalculatedMesh();
     }
 
 }

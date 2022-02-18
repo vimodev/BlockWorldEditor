@@ -204,8 +204,8 @@ public class App {
             // Render the UI over the rest
             renderUI(world);
 
-            if (accumulatedTime > 1) {
-                accumulatedTime -= 1;
+            if (accumulatedTime > 0.1) {
+                accumulatedTime -= 0.1;
                 world.gatherChunks();
                 // Make sure chunks around the player are generated
                 world.generateChunksInRange((Renderer.RENDER_DISTANCE));

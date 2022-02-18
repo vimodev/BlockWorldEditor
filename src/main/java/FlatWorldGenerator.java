@@ -28,17 +28,17 @@ public class FlatWorldGenerator implements WorldGenerator {
             for (int z = 0; z < Chunk.WIDTH; z++) {
                 // Set the first layer
                 for (int y = 0; y < l1; y++) {
-                    if (y < 0 || y > Chunk.HEIGHT) continue;
+                    if (y < 0 || y >= Chunk.HEIGHT) continue;
                     chunk.setBlock(x, y, z, new Block(chunk.origin.x + x, chunk.origin.y + y, chunk.origin.z + z, l1t));
                 }
                 // Set the second layer
                 for (int y = l1; y < l1 + l2; y++) {
-                    if (y < 0 || y > Chunk.HEIGHT) continue;
+                    if (y < 0 || y >= Chunk.HEIGHT) continue;
                     chunk.setBlock(x, y, z, new Block(chunk.origin.x + x, chunk.origin.y + y, chunk.origin.z + z, l2t));
                 }
                 // Set the third layer
                 for (int y = l1 + l2; y < l1 + l2 + l3; y++) {
-                    if (y < 0 || y > Chunk.HEIGHT) continue;
+                    if (y < 0 || y >= Chunk.HEIGHT) continue;
                     chunk.setBlock(x, y, z, new Block(chunk.origin.x + x, chunk.origin.y + y, chunk.origin.z + z, l3t));
                 }
             }

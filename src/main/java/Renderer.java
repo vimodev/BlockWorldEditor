@@ -16,7 +16,7 @@ public class Renderer {
 
     public static Shader defaultShader = new DefaultShader();
 
-    public static float RENDER_DISTANCE = 100f;
+    public static float RENDER_DISTANCE = 200f;
     public static int numberRendered = 0;
 
     public static void render(World world) {

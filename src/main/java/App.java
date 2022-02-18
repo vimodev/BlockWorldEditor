@@ -139,16 +139,17 @@ public class App {
     public void loop() {
 
         // Make a world instance with some blocks
-        world = new World(this, new FlatWorldGenerator(10, BlockType.STONE, 4, BlockType.DIRT, 1, BlockType.GRASS));
+//        world = new World(this, new FlatWorldGenerator(10, BlockType.STONE, 4, BlockType.DIRT, 1, BlockType.GRASS));
+        world = new World(this, new HillWorldGenerator(420, 30, 15, 100f));
 
         // Generate some blocks of all types
-        float offset = 0;
-        for (BlockType type : BlockType.values()) {
-            for (int i = 0; i < 1000; i++) {
-                world.addBlock(new Block(offset, 15f, i * -2.0f, type));
-            }
-            offset += 2.0f;
-        }
+//        float offset = 0;
+//        for (BlockType type : BlockType.values()) {
+//            for (int i = 0; i < 1000; i++) {
+//                world.addBlock(new Block(offset, 15f, i * -2.0f, type));
+//            }
+//            offset += 2.0f;
+//        }
 //        for (int x = -150; x < 150; x++) {
 //            for (int z = -150; z < 150; z++) {
 //                for (int y = 0; y < 15; y++) {
@@ -159,7 +160,7 @@ public class App {
 //            }
 //        }
 
-        world.camera.position.y = 55f;
+        world.camera.position.y = 250f;
 
         // After editing all the chunks, we generate their mesh
         for (Chunk c : world.chunks) c.regenerateMesh();
@@ -188,7 +189,7 @@ public class App {
             else CommandLine.processInput();
 
             // Make sure chunks around the player are loaded by poking them
-            world.pokeChunks(Chunk.WIDTH * 3f);
+            world.pokeChunks((Renderer.RENDER_DISTANCE) + Chunk.WIDTH);
 
             // Render the world
             if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -238,7 +239,14 @@ public class App {
         nvgFontSize(vg, fontSize);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
-        nvgText(vg, 10, y, "#chunks: " + Renderer.numberRendered);
+        nvgText(vg, 10, y, "#chunks rendered: " + Renderer.numberRendered);
+        y += 15;
+        // # Loaded chunks
+        nvgBeginPath(vg);
+        nvgFontSize(vg, fontSize);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
+        nvgText(vg, 10, y, "#chunks loaded: " + world.chunks.size());
         y += 15;
         // Camera coordinates
         nvgBeginPath(vg);

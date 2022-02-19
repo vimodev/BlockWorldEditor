@@ -8,40 +8,44 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
+import java.io.*;
 import java.nio.FloatBuffer;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Block container with a single mesh
  */
-public class Chunk {
+public class Chunk implements Serializable {
 
     // Chunk dimensions WIDTH x WIDTH x HEIGHT
     public static final int WIDTH = 32;
     public static final int HEIGHT = 256;
 
     // Chunk parent world
-    public World world;
+    public transient World world;
 
     // 3d grid of blocks: x z y
-    public Block[][][] blocks;
+    public transient Block[][][] blocks;
     // Origin of the chunk in the world
     public Vector3i origin;
+
+    public transient boolean modified;
 
     // List of all blocks in the chunk, for easy iteration
     List<Block> blockList;
 
     // VAO that holds current mesh
-    public boolean meshReady;
-    public int mesh;
-    public int vertexCount;
-    private List<Integer> vbos;
+    public transient boolean meshReady;
+    public transient int mesh;
+    public transient int vertexCount;
+    private transient List<Integer> vbos;
 
     // Hold mesh data during the time between calculating and loading to gpu
-    private List<Float> positions;
-    private List<Float> textureCoords;
-    private List<Float> normals;
+    private transient List<Float> positions;
+    private transient List<Float> textureCoords;
+    private transient List<Float> normals;
 
     public Chunk(World world, int x, int y, int z) {
         this.world = world;
@@ -69,6 +73,7 @@ public class Chunk {
     }
 
     public Block removeBlock(int x, int y, int z) {
+        modified = true;
         Block block = blocks[x][z][y];
         if (block == null) return null;
         blockList.remove(block);
@@ -102,6 +107,7 @@ public class Chunk {
      * @param block
      */
     public void setBlock(int x, int y, int z, Block block) {
+        modified = true;
         blocks[x][z][y] = block;
         block.positionInChunk = new Vector3i(x, y, z);
         block.chunk = this;
@@ -239,6 +245,19 @@ public class Chunk {
     public void regenerateMesh() {
         calculateMesh();
         loadCalculatedMesh();
+    }
+
+    public static File toFile(Chunk chunk) {
+        try {
+            File file = Files.createTempFile("bwe", ".chunk").toFile();
+            FileOutputStream fos = new FileOutputStream(file);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(chunk);
+            return file;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

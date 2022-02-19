@@ -3,6 +3,7 @@ import org.joml.*;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -29,7 +30,7 @@ enum BlockType {
 /**
  * Representation of a block in game
  */
-public class Block {
+public class Block implements Serializable {
 
     // Texture stuff
     static final String textureFile = "textures.png";
@@ -58,10 +59,7 @@ public class Block {
 
     // Chunk stuff
     // Which faces are rendering
-    public boolean[] faces;
-    // Block iteration pointers
-    public Block previous;
-    public Block next;
+    public transient boolean[] faces;
     // Block position inside chunk
     public Vector3i positionInChunk;
     // Parent chunk

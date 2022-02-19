@@ -1,4 +1,5 @@
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.joml.Vector3i;
 
 import java.util.*;
@@ -17,6 +18,9 @@ public class World {
 
     public WorldGenerator worldGenerator;
     public List<Chunk> chunks;
+
+    public static float chunkLoadRange = 160f;
+    public static float chunkUnloadRange = 256f;
 
     public Vector3f skyColor;
 
@@ -85,6 +89,53 @@ public class World {
         }
         Chunk chunk = new Chunk(this, floorX, 0, floorZ);
         return chunk;
+    }
+
+    public int manageChunks() {
+        Vector3f position = new Vector3f(camera.position);
+        position.y = 0;
+        // Unload all chunks outside of unload range
+        List<Chunk> unloadedChunks = new ArrayList<>();
+        for (Chunk chunk : chunks) {
+            // If outside unload range
+            if (position.distance(chunk.origin.x, chunk.origin.y, chunk.origin.z) > chunkUnloadRange) {
+                // If modified we write it to disk, otherwise we can just regenerate it when we need it again
+                if (chunk.modified) {
+
+                }
+                unloadedChunks.add(chunk);
+            }
+        }
+        chunks.removeAll(unloadedChunks);
+        // Load all missing chunks inside the range
+        int loading = 0;
+        for (float x = position.x - chunkLoadRange; x < position.x + chunkLoadRange; x += Chunk.WIDTH) {
+            for (float z = position.z - chunkLoadRange; z < position.z + chunkLoadRange; z += Chunk.WIDTH) {
+                int floorX = (int) Math.floor(x / Chunk.WIDTH) * Chunk.WIDTH;
+                int floorZ = (int) Math.floor(z / Chunk.WIDTH) * Chunk.WIDTH;
+                if (position.distance(floorX, 0, floorZ) > chunkLoadRange) continue;
+                // Check if the chunk already exists
+                boolean chunkExists = false;
+                for (Chunk chunk : chunks) {
+                    if (chunk.origin.x == floorX && chunk.origin.z == floorZ) {
+                        chunkExists = true;
+                        break;
+                    }
+                }
+                // If chunk does not exist
+                if (!chunkExists) {
+                    Chunk chunk = new Chunk(this, floorX, 0, floorZ);
+                    // Generate it
+                    if (worldGenerator != null) {
+                        worldGenerator.dispatch(this, chunk);
+                        loading++;
+                    } else { // Or add empty one
+                        chunks.add(chunk);
+                    }
+                }
+            }
+        }
+        return loading;
     }
 
     /**

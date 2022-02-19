@@ -144,29 +144,11 @@ public class App {
 //        world = new World(this);
 
         // Make sure initial world is rendered, because spawning without chunks is bad
-        int generating = world.generateChunksInRange((Renderer.RENDER_DISTANCE) + Chunk.WIDTH);
+        int generating = world.manageChunks();
         // Just loop disgustingly until all dispatches are done
         while (world.chunks.size() < generating) {
             world.gatherChunks();
         }
-
-        // Generate some blocks of all types
-//        float offset = 0;
-//        for (BlockType type : BlockType.values()) {
-//            for (int i = 0; i < 1000; i++) {
-//                world.addBlock(new Block(offset, 15f, i * -2.0f, type));
-//            }
-//            offset += 2.0f;
-//        }
-//        for (int x = -150; x < 150; x++) {
-//            for (int z = -150; z < 150; z++) {
-//                for (int y = 0; y < 15; y++) {
-//                    if (y < 10) world.addBlock(new Block(x, y, z, BlockType.STONE));
-//                    else if (y < 14) world.addBlock(new Block(x, y, z, BlockType.DIRT));
-//                    else world.addBlock(new Block(x, y, z, BlockType.GRASS));
-//                }
-//            }
-//        }
 
         world.camera.position.y = 250f;
 
@@ -208,7 +190,8 @@ public class App {
                 accumulatedTime -= 0.1;
                 world.gatherChunks();
                 // Make sure chunks around the player are generated
-                world.generateChunksInRange((Renderer.RENDER_DISTANCE));
+//                world.generateChunksInRange((Renderer.RENDER_DISTANCE));
+                world.manageChunks();
             }
 
             // All nano vg rendering must occur before this call

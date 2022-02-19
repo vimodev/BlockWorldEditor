@@ -59,7 +59,7 @@ public class Block implements Serializable {
 
     // Chunk stuff
     // Which faces are rendering
-    public transient boolean[] faces;
+    public boolean[] faces;
     // Block position inside chunk
     public Vector3i positionInChunk;
     // Parent chunk

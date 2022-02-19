@@ -22,6 +22,8 @@ public class GenerationJob implements Runnable {
         chunk.calculateMesh();
         // Mark as unmodified as it has been freshly generated
         chunk.modified = false;
+        // Set parent world
+        chunk.world = world;
         // And add it to the 'done' queue
         generator.addChunkToQueue(chunk);
     }

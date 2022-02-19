@@ -31,7 +31,7 @@ public class Chunk implements Serializable {
     // Origin of the chunk in the world
     public Vector3i origin;
 
-    public transient boolean modified;
+    public boolean modified;
 
     // List of all blocks in the chunk, for easy iteration
     List<Block> blockList;
@@ -255,6 +255,27 @@ public class Chunk implements Serializable {
             oos.writeObject(chunk);
             return file;
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Chunk fromFile(World world, File file) {
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            Chunk chunk = (Chunk) ois.readObject();
+            chunk.blocks = new Block[WIDTH][WIDTH][HEIGHT];
+            chunk.meshReady = false;
+            chunk.mesh = -1;
+            chunk.vbos = new ArrayList<>();
+            chunk.vertexCount = -1;
+            chunk.world = world;
+            for (Block b : chunk.blockList) {
+                chunk.blocks[b.positionInChunk.x][b.positionInChunk.z][b.positionInChunk.y] = b;
+            }
+            return chunk;
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         return null;

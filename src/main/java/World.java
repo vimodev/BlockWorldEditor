@@ -2,7 +2,10 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.joml.Vector3i;
 
+import java.io.File;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -19,8 +22,8 @@ public class World {
     public WorldGenerator worldGenerator;
     public List<Chunk> chunks;
 
-    public static float chunkLoadRange = 160f;
-    public static float chunkUnloadRange = 256f;
+    public static float chunkLoadRange = 256f;
+    public static float chunkUnloadRange = 384f;
 
     public Vector3f skyColor;
 
@@ -101,7 +104,8 @@ public class World {
             if (position.distance(chunk.origin.x, chunk.origin.y, chunk.origin.z) > chunkUnloadRange) {
                 // If modified we write it to disk, otherwise we can just regenerate it when we need it again
                 if (chunk.modified) {
-
+                    ChunkArchiver.archiveChunk(chunk);
+                    System.out.println("Archiving modified chunk");
                 }
                 unloadedChunks.add(chunk);
             }
@@ -122,11 +126,15 @@ public class World {
                         break;
                     }
                 }
-                // If chunk does not exist
-                if (!chunkExists) {
+                // If chunk does not exist, and it is not currently being loaded already
+                if (!chunkExists && !isBeingLoaded(new Vector3i(floorX, 0, floorZ))) {
                     Chunk chunk = new Chunk(this, floorX, 0, floorZ);
-                    // Generate it
-                    if (worldGenerator != null) {
+                    // Generate it or load it
+                    if (ChunkArchiver.contains(new Vector3i(floorX, 0, floorZ))) {
+                        ChunkArchiver.unarchiveChunk(this, new Vector3i(floorX, 0, floorZ));
+                        System.out.println("Unarchiving modified chunk");
+                        loading++;
+                    } else if (worldGenerator != null) {
                         worldGenerator.dispatch(this, chunk);
                         loading++;
                     } else { // Or add empty one
@@ -138,38 +146,8 @@ public class World {
         return loading;
     }
 
-    /**
-     * Dispatch a chunk generation job for all unloaded chunks within distance
-     * @param distance
-     * @return
-     */
-    public int generateChunksInRange(float distance) {
-        int generating = 0;
-        Vector3f position = new Vector3f(camera.position);
-        for (float x = position.x - distance; x < position.x + distance; x += Chunk.WIDTH) {
-            for (float z = position.z - distance; z < position.z + distance; z += Chunk.WIDTH) {
-                if (position.distance(x, position.y, z) > distance) continue;
-                int floorX = (int) Math.floor(x / Chunk.WIDTH) * Chunk.WIDTH;
-                int floorZ = (int) Math.floor(z / Chunk.WIDTH) * Chunk.WIDTH;
-                boolean chunkExists = false;
-                for (Chunk chunk : chunks) {
-                    if (chunk.origin.x == floorX && chunk.origin.z == floorZ) {
-                        chunkExists = true;
-                        break;
-                    }
-                }
-                if (!chunkExists) {
-                    Chunk chunk = new Chunk(this, floorX, 0, floorZ);
-                    if (worldGenerator != null) {
-                        worldGenerator.dispatch(this, chunk);
-                        generating++;
-                    } else {
-                        chunks.add(chunk);
-                    }
-                }
-            }
-        }
-        return generating;
+    public boolean isBeingLoaded(Vector3i key) {
+        return (ChunkArchiver.inProgress.contains(key) || worldGenerator.inProgress.contains(key));
     }
 
     /**
@@ -177,8 +155,11 @@ public class World {
      * and generate their mesh
      */
     public void gatherChunks() {
+        List<Chunk> results = ChunkArchiver.gather();
+        chunks.addAll(results);
+        for (Chunk c : results) c.loadCalculatedMesh();
         if (worldGenerator == null) return;
-        List<Chunk> results = worldGenerator.gather();
+        results = worldGenerator.gather();
         chunks.addAll(results);
         for (Chunk c : results) c.loadCalculatedMesh();
     }

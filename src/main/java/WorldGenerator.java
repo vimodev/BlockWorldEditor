@@ -1,5 +1,9 @@
+import org.joml.Vector3i;
+
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -10,6 +14,8 @@ public abstract class WorldGenerator {
 
     // Currently running jobs
     public List<Thread> jobs;
+    // All keys of chunks that are currently either running or in the queue
+    public Set<Vector3i> inProgress;
     // Chunks that are done and need to be gathered by main thread
     private List<Chunk> chunkQueue;
     // Mutex for the previous list
@@ -17,6 +23,7 @@ public abstract class WorldGenerator {
 
     public WorldGenerator() {
         jobs = new ArrayList<>();
+        inProgress = new HashSet<>();
         chunkQueue = new ArrayList<>();
         chunkQueueLock = new ReentrantLock(true);
     }
@@ -37,6 +44,7 @@ public abstract class WorldGenerator {
     public void dispatch(World world, Chunk chunk) {
         Thread thread = new Thread(new GenerationJob(this, world, chunk));
         jobs.add(thread);
+        inProgress.add(chunk.origin);
         thread.start();
     }
 
@@ -48,7 +56,9 @@ public abstract class WorldGenerator {
     public List<Chunk> gather() {
         List<Thread> finished = new ArrayList<>();
         for (Thread thread : jobs) {
-            if (!thread.isAlive()) finished.add(thread);
+            if (!thread.isAlive()) {
+                finished.add(thread);
+            }
         }
         for (Thread thread : finished) {
             try {
@@ -58,7 +68,9 @@ public abstract class WorldGenerator {
             }
         }
         jobs.removeAll(finished);
-        return clearQueue();
+        List<Chunk> results = clearQueue();
+        for (Chunk c : results) inProgress.remove(c.origin);
+        return results;
     }
 
     /**

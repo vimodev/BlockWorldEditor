@@ -253,6 +253,8 @@ public class Chunk implements Serializable {
             FileOutputStream fos = new FileOutputStream(file);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(chunk);
+            fos.close();
+            oos.close();
             return file;
         } catch (IOException e) {
             e.printStackTrace();
@@ -274,6 +276,8 @@ public class Chunk implements Serializable {
             for (Block b : chunk.blockList) {
                 chunk.blocks[b.positionInChunk.x][b.positionInChunk.z][b.positionInChunk.y] = b;
             }
+            fis.close();
+            ois.close();
             return chunk;
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();

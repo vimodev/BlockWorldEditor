@@ -22,7 +22,9 @@ public class World {
     public WorldGenerator worldGenerator;
     public List<Chunk> chunks;
 
+    // Chunks inside this range should be loaded
     public static float chunkLoadRange = 256f;
+    // Chunks outside this range should be unloaded
     public static float chunkUnloadRange = 384f;
 
     public Vector3f skyColor;
@@ -94,6 +96,10 @@ public class World {
         return chunk;
     }
 
+    /**
+     * Load and unload chunks as necessary
+     * @return
+     */
     public int manageChunks() {
         Vector3f position = new Vector3f(camera.position);
         position.y = 0;

@@ -25,6 +25,11 @@ public class ChunkArchiver {
     // All origins of all chunks either in progress or in queue
     public static Set<Vector3i> inProgress = new HashSet<>();
 
+    /**
+     * Does the archive contain the key?
+     * @param key
+     * @return
+     */
     public static boolean contains(Vector3i key) {
         unloadedChunksLock.lock();
         boolean contains = unloadedChunks.containsKey(key);
@@ -32,6 +37,10 @@ public class ChunkArchiver {
         return contains;
     }
 
+    /**
+     * Gather all finished jobs
+     * @return
+     */
     public static List<Chunk> gather() {
         List<Thread> finished = new ArrayList<>();
         for (Thread thread : jobs) {
@@ -50,6 +59,10 @@ public class ChunkArchiver {
         return results;
     }
 
+    /**
+     * Clear the result queue
+     * @return
+     */
     public static List<Chunk> clearQueue() {
         chunkQueueLock.lock();
         List<Chunk> results = new ArrayList<>(chunkQueue);
@@ -58,12 +71,21 @@ public class ChunkArchiver {
         return results;
     }
 
+    /**
+     * Archive the given chunk to disk
+     * @param chunk
+     */
     public static void archiveChunk(Chunk chunk) {
         Thread thread = new Thread(new ArchivePutJob(chunk));
         jobs.add(thread);
         thread.start();
     }
 
+    /**
+     * Unarchive the chunk at given position
+     * @param world
+     * @param key
+     */
     public static void unarchiveChunk(World world, Vector3i key) {
         Thread thread = new Thread(new ArchiveFetchJob(world, key));
         jobs.add(thread);

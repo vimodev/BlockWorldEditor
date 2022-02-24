@@ -22,7 +22,7 @@ public class ArchiveFetchJob implements Runnable {
         File file = ChunkArchiver.unloadedChunks.remove(key);
         ChunkArchiver.unloadedChunksLock.unlock();
         // Load the chunk
-        Chunk chunk = Chunk.fromFile(world, file);
+        Chunk chunk = Chunk.fromFile(world, key, file);
         chunk.calculateMesh();
         // Remove the file
         file.delete();

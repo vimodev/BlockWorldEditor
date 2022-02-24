@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -17,20 +18,46 @@ import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
  */
 enum BlockType {
 //    NONE,
-    GRASS,
-    STONE,
-    DIRT,
-    PLANKS,
-    BRICK,
-    COBBLE,
-    SAND,
-    WOOL_WHITE,
+    GRASS(1),
+    STONE(2),
+    DIRT(3),
+    PLANKS(4),
+    BRICK(5),
+    COBBLE(6),
+    SAND(7),
+    WOOL_WHITE(8);
+
+    // Blocktype id, is a byte for small serialization size
+    private final byte id;
+    // Map to get blocktype from id
+    private static Map<Byte, BlockType> map = new HashMap<>();
+
+    // Populate id->blocktype mapping
+    static {
+        for (BlockType type : BlockType.values()) {
+            map.put(type.id, type);
+        }
+    }
+
+    BlockType(int id) {
+        this.id = (byte) id;
+    }
+
+    public byte id() {
+        return this.id;
+    }
+
+    public static BlockType type(byte id) {
+        return map.get(id);
+    }
+
+
 }
 
 /**
  * Representation of a block in game
  */
-public class Block implements Serializable {
+public class Block {
 
     // Texture stuff
     static final String textureFile = "textures.png";

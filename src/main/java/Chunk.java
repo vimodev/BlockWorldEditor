@@ -17,17 +17,17 @@ import java.util.List;
 /**
  * Block container with a single mesh
  */
-public class Chunk implements Serializable {
+public class Chunk {
 
     // Chunk dimensions WIDTH x WIDTH x HEIGHT
     public static final int WIDTH = 32;
     public static final int HEIGHT = 256;
 
     // Chunk parent world
-    public transient World world;
+    public World world;
 
     // 3d grid of blocks: x z y
-    public transient Block[][][] blocks;
+    public Block[][][] blocks;
     // Origin of the chunk in the world
     public Vector3i origin;
 
@@ -37,15 +37,15 @@ public class Chunk implements Serializable {
     List<Block> blockList;
 
     // VAO that holds current mesh
-    public transient boolean meshReady;
-    public transient int mesh;
-    public transient int vertexCount;
-    private transient List<Integer> vbos;
+    public boolean meshReady;
+    public int mesh;
+    public int vertexCount;
+    private List<Integer> vbos;
 
     // Hold mesh data during the time between calculating and loading to gpu
-    private transient List<Float> positions;
-    private transient List<Float> textureCoords;
-    private transient List<Float> normals;
+    private List<Float> positions;
+    private List<Float> textureCoords;
+    private List<Float> normals;
 
     public Chunk(World world, int x, int y, int z) {
         this.world = world;
@@ -252,7 +252,16 @@ public class Chunk implements Serializable {
             File file = Files.createTempFile("bwe", ".chunk").toFile();
             FileOutputStream fos = new FileOutputStream(file);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(chunk);
+            // Create array of blocktype ids, which has very small serialization size
+            byte[][][] blockIds = new byte[Chunk.WIDTH][Chunk.WIDTH][Chunk.HEIGHT];
+            for (int x = 0; x < Chunk.WIDTH; x++) {
+                for (int z = 0; z < Chunk.WIDTH; z++) {
+                    for (int y = 0; y < Chunk.HEIGHT; y++) {
+                        blockIds[x][z][y] = (chunk.blocks[x][z][y] == null) ? ((byte) 0) : (chunk.blocks[x][z][y].type.id());
+                    }
+                }
+            }
+            oos.writeObject(blockIds);
             fos.close();
             oos.close();
             return file;
@@ -262,19 +271,21 @@ public class Chunk implements Serializable {
         return null;
     }
 
-    public static Chunk fromFile(World world, File file) {
+    public static Chunk fromFile(World world, Vector3i origin, File file) {
         try {
             FileInputStream fis = new FileInputStream(file);
             ObjectInputStream ois = new ObjectInputStream(fis);
-            Chunk chunk = (Chunk) ois.readObject();
-            chunk.blocks = new Block[WIDTH][WIDTH][HEIGHT];
-            chunk.meshReady = false;
-            chunk.mesh = -1;
-            chunk.vbos = new ArrayList<>();
-            chunk.vertexCount = -1;
-            chunk.world = world;
-            for (Block b : chunk.blockList) {
-                chunk.blocks[b.positionInChunk.x][b.positionInChunk.z][b.positionInChunk.y] = b;
+            Chunk chunk = new Chunk(world, origin.x, origin.y, origin.z);
+            // Parse array of blocktype ids and fill chunk
+            byte[][][] blockIds = (byte[][][]) ois.readObject();
+            for (int x = 0; x < Chunk.WIDTH; x++) {
+                for (int z = 0; z < Chunk.WIDTH; z++) {
+                    for (int y = 0; y < Chunk.HEIGHT; y++) {
+                        if (blockIds[x][z][y] != 0) {
+                            chunk.setBlock(x, y, z, new Block(origin.x + x, origin.y + y, origin.z + z, BlockType.type(blockIds[x][z][y])));
+                        }
+                    }
+                }
             }
             fis.close();
             ois.close();

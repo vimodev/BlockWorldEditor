@@ -22,6 +22,8 @@ import static org.lwjgl.opengl.GL11.*;
  */
 public class App {
 
+    static App instance;
+
     public Window window;
     public int WINDOW_WIDTH = 1920;
     public int WINDOW_HEIGHT = 1080;
@@ -131,6 +133,17 @@ public class App {
         glfwSetScrollCallback(window.getWindow(), (long window, double xoffset, double yoffset) -> {
             Toolbar.processScroll(yoffset);
         });
+
+        // Set window resize callback
+        glfwSetFramebufferSizeCallback(window.getWindow(), (long window, int width, int height) -> {
+            glViewport(0, 0, width, height);
+            App.instance.window.setDimensions(width, height);
+            App.instance.world.camera.setProjection(
+                    (float) width / height,
+                    App.instance.world.camera.fieldOfView,
+                    App.instance.world.camera.zNear,
+                    App.instance.world.camera.zFar);
+        });
     }
 
     /**
@@ -154,6 +167,8 @@ public class App {
 
         // After editing all the chunks, we generate their mesh
         for (Chunk c : world.chunks) c.regenerateMesh();
+
+        glfwMaximizeWindow(window.getWindow());
 
         // Main game loop
         fps.dt();
@@ -434,6 +449,7 @@ public class App {
 
     public static void main(String[] args) {
         App main = new App();
+        App.instance = main;
         main.run();
     }
 

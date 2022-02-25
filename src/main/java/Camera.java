@@ -37,9 +37,9 @@ public class Camera {
     private float movementSpeed = 40f;
     private float strafeSpeed = 10f;
     private float verticalSpeed = 10f;
-    private float fieldOfView = 70f;
     private float gravity = -50;
     private float jumpStrength = 20;
+    public float fieldOfView = 70f;
     public float aspectRatio = 1920f / 1080f;
     public float zNear = 0.1f;
     public float zFar = 1000f;

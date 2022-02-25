@@ -42,6 +42,11 @@ public class Window {
         return height;
     }
 
+    public void setDimensions(int width, int height) {
+        this.width = width;
+        this.height = height;
+    }
+
     public long getWindow() {
         return window;
     }

@@ -180,7 +180,12 @@ public class App {
 
             // Open and close command line
             if (InputController.keyPressed(GLFW_KEY_ENTER)) {
-                if (CommandLine.show) executeCommand(CommandLine.content);
+                if (CommandLine.show) {
+                    executeCommand(CommandLine.content);
+                    glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+                } else {
+                    glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                }
                 CommandLine.show = !CommandLine.show;
                 CommandLine.historyIndex = -1;
                 CommandLine.content = "";

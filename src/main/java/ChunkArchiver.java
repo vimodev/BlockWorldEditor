@@ -93,4 +93,14 @@ public class ChunkArchiver {
         thread.start();
     }
 
+    public static void reset() {
+        for (Thread t : jobs) t.interrupt();
+        clearQueue();
+        unloadedChunksLock.lock();
+        unloadedChunks.clear();
+        unloadedChunksLock.unlock();
+        inProgress.clear();
+        jobs.clear();
+    }
+
 }

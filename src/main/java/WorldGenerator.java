@@ -1,9 +1,6 @@
 import org.joml.Vector3i;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -21,11 +18,14 @@ public abstract class WorldGenerator {
     // Mutex for the previous list
     private Lock chunkQueueLock;
 
+    public HashMap<String, String> config;
+
     public WorldGenerator() {
         jobs = new ArrayList<>();
         inProgress = new HashSet<>();
         chunkQueue = new ArrayList<>();
         chunkQueueLock = new ReentrantLock(true);
+        config = new HashMap<>();
     }
 
     /**

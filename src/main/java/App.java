@@ -153,7 +153,7 @@ public class App {
 
         // Make a world instance with some blocks
 //        world = new World(this, new FlatWorldGenerator(10, BlockType.STONE, 4, BlockType.DIRT, 1, BlockType.GRASS));
-        world = new World(this, new HillWorldGenerator(420, 30, 15, 100f));
+        world = new World(this, new HillWorldGenerator(System.currentTimeMillis(), 30, 15, 100f));
 //        world = new World(this);
 
         // Make sure initial world is rendered, because spawning without chunks is bad
@@ -356,7 +356,8 @@ public class App {
             JOptionPane.showMessageDialog(new JDialog(), h.toString());
         } else if (command.equals("import")) {
             // Import a world from a file
-            world = WorldManager.importWorld(this);
+            World newWorld = WorldManager.importWorld(this);
+            if (newWorld != null) world = newWorld;
         } else if (command.equals("export")) {
             // Export current world to a file
             WorldManager.exportWorld(world);

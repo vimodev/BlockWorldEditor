@@ -16,6 +16,10 @@ public class HillWorldGenerator extends WorldGenerator {
         this.amplitude = amplitude;
         this.frequency = frequency;
         this.height = height;
+        config.put("seed", String.valueOf(seed));
+        config.put("height", String.valueOf(height));
+        config.put("amplitude", String.valueOf(amplitude));
+        config.put("frequency", String.valueOf(frequency));
     }
 
     @Override

@@ -19,7 +19,7 @@ public class World {
 
     public Camera camera;
 
-    public WorldGenerator worldGenerator;
+    public HillWorldGenerator worldGenerator;
     public List<Chunk> chunks;
 
     // Chunks inside this range should be loaded
@@ -49,7 +49,7 @@ public class World {
 
     public boolean flying = false;
 
-    public World(App app, WorldGenerator worldGenerator) {
+    public World(App app, HillWorldGenerator worldGenerator) {
         this(app);
         this.worldGenerator = worldGenerator;
     }

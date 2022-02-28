@@ -108,6 +108,7 @@ public class World {
         for (Chunk chunk : chunks) {
             // If outside unload range
             if (position.distance(chunk.origin.x, chunk.origin.y, chunk.origin.z) > chunkUnloadRange) {
+                chunk.unloadMesh();
                 // If modified we write it to disk, otherwise we can just regenerate it when we need it again
                 if (chunk.modified) {
                     ChunkArchiver.archiveChunk(chunk);
@@ -358,14 +359,6 @@ public class World {
 
     public void render() {
         Renderer.render(this);
-    }
-
-    public void fromFile(String filename) {
-
-    }
-
-    public void toFile(String filename) {
-
     }
 
 }

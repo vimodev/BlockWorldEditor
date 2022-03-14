@@ -152,9 +152,7 @@ public class App {
     public void loop() {
 
         // Make a world instance with some blocks
-//        world = new World(this, new FlatWorldGenerator(10, BlockType.STONE, 4, BlockType.DIRT, 1, BlockType.GRASS));
         world = new World(this, new HillWorldGenerator(System.currentTimeMillis(), 30, 15, 100f));
-//        world = new World(this);
 
         // Make sure initial world is rendered, because spawning without chunks is bad
         int generating = world.manageChunks();
@@ -164,9 +162,6 @@ public class App {
         }
 
         world.camera.position.y = 250f;
-
-        // After editing all the chunks, we generate their mesh
-        for (Chunk c : world.chunks) c.regenerateMesh();
 
         glfwMaximizeWindow(window.getWindow());
 
@@ -210,7 +205,6 @@ public class App {
                 accumulatedTime -= 0.1;
                 world.gatherChunks();
                 // Make sure chunks around the player are generated
-//                world.generateChunksInRange((Renderer.RENDER_DISTANCE));
                 world.manageChunks();
             }
 

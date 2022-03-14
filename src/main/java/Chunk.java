@@ -79,22 +79,22 @@ public class Chunk {
         blockList.remove(block);
         blocks[x][z][y] = null;
         if (x - 1 >= 0 && blocks[x-1][z][y] != null) {
-            blocks[x-1][z][y].faces[1] = true;
+            blocks[x-1][z][y].setFace(1, true);
         }
         if (x + 1 < Chunk.WIDTH && blocks[x+1][z][y] != null) {
-            blocks[x + 1][z][y].faces[3] = true;
+            blocks[x + 1][z][y].setFace(3, true);
         }
         if (z - 1 >= 0 && blocks[x][z-1][y] != null) {
-            blocks[x][z-1][y].faces[2] = true;
+            blocks[x][z-1][y].setFace(2, true);
         }
         if (z + 1 < Chunk.WIDTH && blocks[x][z+1][y] != null) {
-            blocks[x][z+1][y].faces[0] = true;
+            blocks[x][z+1][y].setFace(0, true);
         }
         if (y - 1 >= 0 && blocks[x][z][y-1] != null) {
-            blocks[x][z][y-1].faces[4] = true;
+            blocks[x][z][y-1].setFace(4, true);
         }
         if (y + 1 < Chunk.HEIGHT && blocks[x][z][y+1] != null) {
-            blocks[x][z][y+1].faces[5] = true;
+            blocks[x][z][y+1].setFace(5, true);
         }
         return block;
     }
@@ -109,32 +109,32 @@ public class Chunk {
     public void setBlock(int x, int y, int z, Block block) {
         modified = true;
         blocks[x][z][y] = block;
-        block.positionInChunk = new Vector3i(x, y, z);
+        block.inChunkX = (short) x; block.inChunkY = (short) y; block.inChunkZ = (short) z;
         block.chunk = this;
         // Set face data, which face faces another block? we dont need to render that one!
         if (x - 1 >= 0 && blocks[x-1][z][y] != null) {
-            block.faces[3] = false;
-            blocks[x-1][z][y].faces[1] = false;
+            block.setFace(3, false);
+            blocks[x-1][z][y].setFace(1, false);
         }
         if (x + 1 < Chunk.WIDTH && blocks[x+1][z][y] != null) {
-            block.faces[1] = false;
-            blocks[x + 1][z][y].faces[3] = false;
+            block.setFace(1, false);
+            blocks[x + 1][z][y].setFace(3, false);
         }
         if (z - 1 >= 0 && blocks[x][z-1][y] != null) {
-            block.faces[0] = false;
-            blocks[x][z-1][y].faces[2] = false;
+            block.setFace(0, false);
+            blocks[x][z-1][y].setFace(2, false);
         }
         if (z + 1 < Chunk.WIDTH && blocks[x][z+1][y] != null) {
-            block.faces[2] = false;
-            blocks[x][z+1][y].faces[0] = false;
+            block.setFace(2, false);
+            blocks[x][z+1][y].setFace(0, false);
         }
         if (y - 1 >= 0 && blocks[x][z][y-1] != null) {
-            block.faces[5] = false;
-            blocks[x][z][y-1].faces[4] = false;
+            block.setFace(5, false);
+            blocks[x][z][y-1].setFace(4, false);
         }
         if (y + 1 < Chunk.HEIGHT && blocks[x][z][y+1] != null) {
-            block.faces[4] = false;
-            blocks[x][z][y+1].faces[5] = false;
+            block.setFace(4, false);
+            blocks[x][z][y+1].setFace(5, false);
         }
         // Add to list
         blockList.add(block);
@@ -171,12 +171,12 @@ public class Chunk {
             }
             // Go over all faces that need drawing
             for (int f = 0; f < 6; f++) {
-                if (!block.faces[f]) continue;
+                if (!block.getFace(f)) continue;
                 // Add all the vertex positions, textureCoords and normals for each face's vertices
                 for (int v = 0; v < 6; v++) {
-                    positions.add(Block.faceVertices[f][v * 3] + block.positionInChunk.x);
-                    positions.add(Block.faceVertices[f][v * 3 + 1] + block.positionInChunk.y);
-                    positions.add(Block.faceVertices[f][v * 3 + 2] + block.positionInChunk.z);
+                    positions.add(Block.faceVertices[f][v * 3] + block.inChunkX);
+                    positions.add(Block.faceVertices[f][v * 3 + 1] + block.inChunkY);
+                    positions.add(Block.faceVertices[f][v * 3 + 2] + block.inChunkZ);
                     if (v == 2 || v == 3 || v == 4) textureCoords.add(leftTop.x);
                     else textureCoords.add(leftTop.x + inc);
                     if (v == 1 || v == 2 || v == 3) textureCoords.add(leftTop.y + inc);
@@ -234,9 +234,9 @@ public class Chunk {
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
         GL30.glBindVertexArray(0);
         meshReady = true;
-        positions.clear();
-        normals.clear();
-        textureCoords.clear();
+        positions = null;
+        normals = null;
+        textureCoords = null;
     }
 
     /**
@@ -282,7 +282,7 @@ public class Chunk {
                 for (int z = 0; z < Chunk.WIDTH; z++) {
                     for (int y = 0; y < Chunk.HEIGHT; y++) {
                         if (blockIds[x][z][y] != 0) {
-                            chunk.setBlock(x, y, z, new Block(origin.x + x, origin.y + y, origin.z + z, BlockType.type(blockIds[x][z][y])));
+                            chunk.setBlock(x, y, z, new Block(BlockType.type(blockIds[x][z][y])));
                         }
                     }
                 }

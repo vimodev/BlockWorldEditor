@@ -79,42 +79,43 @@ public class Block {
     // A selected block has this texture coordinate
     static final Vector2i selectTextureLocation = new Vector2i(9, 1);
 
-    // Position of block in world space
-    public Vector3f position;
     // Type of block determines texture
     public BlockType type;
 
     // Chunk stuff
     // Which faces are rendering
-    public boolean[] faces;
+    private byte faceField;
     // Block position inside chunk
-    public Vector3i positionInChunk;
+    public short inChunkX;
+    public short inChunkY;
+    public short inChunkZ;
     // Parent chunk
     public Chunk chunk;
 
     /**
      * Create a block at position with type
-     * @param x coordinate
-     * @param y coordinate
-     * @param z coordinate
      * @param type type of block
      */
-    public Block(float x, float y, float z, BlockType type) {
-        this.position = new Vector3f(x, y, z);
+    public Block(BlockType type) {
+        this.faceField = (byte) 255;
         this.type = type;
-        this.faces = new boolean[6];
-        for (int f = 0; f < 6; f++) this.faces[f] = true;
     }
 
-    /**
-     * Make transformation matrix from the Block's attributes
-     * @return 4d transformation matrix
-     */
-    public Matrix4f getTransformationMatrix() {
-        Matrix4f M = new Matrix4f();
-        M.identity();
-        M.translate(this.position);
-        return M;
+    public void setFace(int index, boolean value) {
+        if (value) {
+            faceField |= 1 << index;
+        } else {
+            faceField &= ~(1 << index);
+        }
+    }
+
+    public boolean getFace(int index) {
+        return ((faceField >> index) & 1) == 1;
+    }
+
+    public Vector3f getPosition() {
+        Vector3i c = this.chunk.origin;
+        return new Vector3f(c.x + inChunkX, c.y + inChunkY, c.z + inChunkZ);
     }
 
     // Vertex positions per face

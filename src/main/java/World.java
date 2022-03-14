@@ -181,11 +181,11 @@ public class World {
     }
 
     // Add a block to its type list
-    public void addBlock(Block block) {
-        Chunk chunk = getChunkFromPosition(block.position);
-        int x = (int) Math.floor(block.position.x) % Chunk.WIDTH;
-        int y = (int) Math.floor(block.position.y) % Chunk.HEIGHT;
-        int z = (int) Math.floor(block.position.z) % Chunk.WIDTH;
+    public void addBlock(Block block, Vector3f position) {
+        Chunk chunk = getChunkFromPosition(position);
+        int x = (int) Math.floor(position.x) % Chunk.WIDTH;
+        int y = (int) Math.floor(position.y) % Chunk.HEIGHT;
+        int z = (int) Math.floor(position.z) % Chunk.WIDTH;
         if (x < 0) x += Chunk.WIDTH;
         if (z < 0) z += Chunk.WIDTH;
         chunk.setBlock(x, y, z, block);
@@ -199,7 +199,7 @@ public class World {
                     Block block = getBlockFromPosition(new Vector3f(x, y, z));
                     if (block != null) {
                         Chunk c = getChunkFromPosition(new Vector3f(x, y, z));
-                        c.removeBlock(block.positionInChunk.x, block.positionInChunk.y, block.positionInChunk.z);
+                        c.removeBlock(block.inChunkX, block.inChunkY, block.inChunkZ);
                         affectedChunks.add(c);
                     }
                 }
@@ -233,8 +233,9 @@ public class World {
                     if (block != null) {
                         block.type = type;
                     } else {
-                        block = new Block((float) Math.floor(x), (float) Math.floor(y), (float) Math.floor(z), type);
-                        addBlock(block);
+                        Vector3f p = new Vector3f((float) Math.floor(x), (float) Math.floor(y), (float) Math.floor(z));
+                        block = new Block(type);
+                        addBlock(block, p);
                     }
                     affectedChunks.add(block.chunk);
                 }
@@ -261,8 +262,9 @@ public class World {
                     if (block != null) {
                         block.type = t;
                     } else {
-                        block = new Block((float) Math.floor(x), (float) Math.floor(y), (float) Math.floor(z), t);
-                        addBlock(block);
+                        Vector3f pos = new Vector3f((float) Math.floor(x), (float) Math.floor(y), (float) Math.floor(z));
+                        block = new Block(t);
+                        addBlock(block, pos);
                     }
                     affectedChunks.add(block.chunk);
                 }
@@ -288,8 +290,8 @@ public class World {
             Block b = getBlockFromPosition(p);
             if (b == null) {
                 p.floor();
-                b = new Block(p.x, p.y, p.z, t);
-                addBlock(b);
+                b = new Block(t);
+                addBlock(b, new Vector3f(p.x, p.y, p.z));
             } else {
                 b.type = t;
             }
@@ -315,7 +317,7 @@ public class World {
             Block block = camera.getBlockAtCrosshair(app, this, camera.clickRange);
             if (block != null) {
                 Chunk c = block.chunk;
-                c.removeBlock(block.positionInChunk.x, block.positionInChunk.y, block.positionInChunk.z);
+                c.removeBlock(block.inChunkX, block.inChunkY, block.inChunkZ);
                 c.regenerateMesh();
             }
         }
@@ -323,7 +325,7 @@ public class World {
         if (InputController.secondaryMouseClicked()) {
             Vector3f loc = camera.getBlockPlaceCoordinatesAtCrosshair(app, this);
             if (loc != null && Toolbar.getSelectedBlock() != null) {
-                addBlock(new Block(loc.x, loc.y, loc.z, Toolbar.getSelectedBlock()));
+                addBlock(new Block(Toolbar.getSelectedBlock()), new Vector3f(loc.x, loc.y, loc.z));
                 getChunkFromPosition(loc).regenerateMesh();
             }
         }
@@ -331,7 +333,7 @@ public class World {
         if (InputController.keyPressed(GLFW_KEY_1)) {
             Block block = camera.getBlockAtCrosshair(app, this, 100f);
             if (block != null) {
-                select1 = new Vector3f(block.position);
+                select1 = new Vector3f(block.getPosition());
                 Block previous = select1Block;
                 select1Block = block;
                 if (previous != null) previous.chunk.regenerateMesh();
@@ -341,7 +343,7 @@ public class World {
         if (InputController.keyPressed(GLFW_KEY_2)) {
             Block block = camera.getBlockAtCrosshair(app, this, 100f);
             if (block != null) {
-                select2 = new Vector3f(block.position);
+                select2 = new Vector3f(block.getPosition());
                 Block previous = select2Block;
                 select2Block = block;
                 if (previous != null) previous.chunk.regenerateMesh();

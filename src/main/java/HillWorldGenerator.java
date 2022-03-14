@@ -39,7 +39,7 @@ public class HillWorldGenerator extends WorldGenerator {
                     BlockType t = BlockType.STONE;
                     if (y == h - 1) t = BlockType.GRASS;
                     else if (y >= h - 5) t = BlockType.DIRT;
-                    chunk.setBlock(x, y, z, new Block(chunk.origin.x + x, chunk.origin.y + y, chunk.origin.z + z, t));
+                    chunk.setBlock(x, y, z, new Block(t));
                 }
             }
         }

@@ -84,7 +84,7 @@ public class Block {
 
     // Chunk stuff
     // Which faces are rendering
-    private byte faceField;
+    public byte faceField;
     // Block position inside chunk
     public short inChunkX;
     public short inChunkY;
@@ -97,8 +97,9 @@ public class Block {
      * @param type type of block
      */
     public Block(BlockType type) {
-        this.faceField = (byte) 255;
+        this.faceField = (byte) 0;
         this.type = type;
+        for (int f = 0; f < 6; f++) setFace(f, true);
     }
 
     public void setFace(int index, boolean value) {

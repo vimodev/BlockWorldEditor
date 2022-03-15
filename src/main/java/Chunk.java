@@ -12,6 +12,7 @@ import java.io.*;
 import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -161,22 +162,29 @@ public class Chunk {
         positions = new ArrayList<>();
         textureCoords = new ArrayList<>();
         normals = new ArrayList<>();
+        float inc = (float) Block.increment / (float) Block.size;
+        HashMap<BlockType, Vector2f> texLoc = new HashMap<>();
+        for (BlockType t : BlockType.values()) {
+            texLoc.put(t, new Vector2f(inc * Block.textureLocation.get(t).x, inc * Block.textureLocation.get(t).y));
+        }
         // Go over all blocks
         for (Block block : blockList) {
             // Calculate texture based on block type
-            float inc = (float) Block.increment / (float) Block.size;
-            Vector2f leftTop = new Vector2f(inc * Block.textureLocation.get(block.type).x, inc * Block.textureLocation.get(block.type).y);
+            Vector2f leftTop = texLoc.get(block.type);
             if (block == world.select1Block || block == world.select2Block) {
                 leftTop = new Vector2f(inc * Block.selectTextureLocation.x, inc * Block.selectTextureLocation.y);
             }
+            // If the entire face field is 0, then no faces need be rendered
+            if (block.faceField == (byte) 0) continue;
+            float x = block.inChunkX; float y = block.inChunkY; float z = block.inChunkZ;
             // Go over all faces that need drawing
             for (int f = 0; f < 6; f++) {
                 if (!block.getFace(f)) continue;
                 // Add all the vertex positions, textureCoords and normals for each face's vertices
                 for (int v = 0; v < 6; v++) {
-                    positions.add(Block.faceVertices[f][v * 3] + block.inChunkX);
-                    positions.add(Block.faceVertices[f][v * 3 + 1] + block.inChunkY);
-                    positions.add(Block.faceVertices[f][v * 3 + 2] + block.inChunkZ);
+                    positions.add(Block.faceVertices[f][v * 3] + x);
+                    positions.add(Block.faceVertices[f][v * 3 + 1] + y);
+                    positions.add(Block.faceVertices[f][v * 3 + 2] + z);
                     if (v == 2 || v == 3 || v == 4) textureCoords.add(leftTop.x);
                     else textureCoords.add(leftTop.x + inc);
                     if (v == 1 || v == 2 || v == 3) textureCoords.add(leftTop.y + inc);

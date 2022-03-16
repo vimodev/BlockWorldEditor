@@ -1,11 +1,10 @@
-import org.joml.Vector2f;
-import org.joml.Vector2i;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
+import org.joml.*;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
+
+import java.lang.Math;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -60,10 +59,8 @@ public class Renderer {
         // Render each chunk's mesh
         numberRendered = 0;
         for (Chunk c : world.chunks) {
-            // Chunks outside render distance dont need to be rendered
-            if (new Vector2f(world.camera.position.x, world.camera.position.z).distance(new Vector2f(c.origin.x, c.origin.z)) > RENDER_DISTANCE) continue;
-            // Dont bother with empty chunks
-            if (c.blockList.isEmpty()) continue;
+            // Check if we should render the chunk
+            if (!shouldChunkRender(c, world.camera)) continue;
             // Otherwise we render the chunk
             numberRendered++;
             shader.setUniform("transformationMatrix", c.getTransformationMatrix());
@@ -78,6 +75,35 @@ public class Renderer {
         GL30.glBindVertexArray(0);
         GL20.glDisableVertexAttribArray(0);
         shader.unuse();
+    }
+
+    private static boolean shouldChunkRender(Chunk chunk, Camera camera) {
+        // Outside render distance should not render
+        float hDistance = new Vector2f(camera.position.x, camera.position.z).distance(
+                new Vector2f(chunk.origin.x + Chunk.WIDTH / 2, chunk.origin.z + Chunk.WIDTH / 2));
+        if (hDistance > RENDER_DISTANCE) return false;
+        if (hDistance < Chunk.WIDTH) return true;
+        // Empty chunk should not render
+        if (chunk.blockList.isEmpty()) return false;
+        // Frustum culling
+        Matrix4f cameraMatrix = camera.getProjection().mul(camera.getTransformation(), new Matrix4f());
+        for (int x = 0; x <= Chunk.WIDTH; x += Chunk.WIDTH / 4) {
+            for (int z = 0; z <= Chunk.WIDTH; z += Chunk.WIDTH / 4) {
+                for (int y = 0; y <= Chunk.HEIGHT; y += Chunk.HEIGHT / 8) {
+                    Vector4f pos = new Vector4f(
+                            chunk.origin.x + x,
+                            chunk.origin.y + y,
+                            chunk.origin.z + z,
+                            1
+                    );
+                    Vector4f result = cameraMatrix.transform(pos, new Vector4f());
+                    float sx = result.x / result.w;
+                    float sy = result.y / result.w;
+                    if (Math.abs(sx) <= 1.1f && Math.abs(sy) <= 1.1f) return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

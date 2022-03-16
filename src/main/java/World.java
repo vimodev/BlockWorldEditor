@@ -21,6 +21,7 @@ public class World {
 
     public HillWorldGenerator worldGenerator;
     public List<Chunk> chunks;
+    public HashMap<Integer, HashMap<Integer, Chunk>> chunkMap;
 
     // Chunks inside this range should be loaded
     public static float chunkLoadRange = 256f;
@@ -58,6 +59,7 @@ public class World {
         this.app = app;
         skyColor = new Vector3f(0.2f, 0.6f, 0.8f);
         chunks = new ArrayList<>();
+        chunkMap = new HashMap<>();
         camera = new Camera(this);
 
 //        pointLights.add(new Light(
@@ -84,13 +86,24 @@ public class World {
 
     }
 
+    public Chunk addChunk(Chunk c) {
+        chunks.add(c);
+        if (!chunkMap.containsKey(c.origin.x)) chunkMap.put(c.origin.x, new HashMap<>());
+        chunkMap.get(c.origin.x).put(c.origin.z, c);
+        return c;
+    }
+
+    public Chunk removeChunk(Chunk c) {
+        chunks.remove(c);
+        chunkMap.get(c.origin.x).remove(c.origin.y);
+        return c;
+    }
+
     public Chunk getChunkFromPosition(Vector3f position) {
         int floorX = (int) Math.floor(position.x / Chunk.WIDTH) * Chunk.WIDTH;
         int floorZ = (int) Math.floor(position.z / Chunk.WIDTH) * Chunk.WIDTH;
-        for (Chunk chunk : chunks) {
-            if (chunk.origin.x == floorX && chunk.origin.z == floorZ) {
-                return chunk;
-            }
+        if (chunkMap.containsKey(floorX) && chunkMap.get(floorX).containsKey(floorZ)) {
+            return chunkMap.get(floorX).get(floorZ);
         }
         Chunk chunk = new Chunk(this, floorX, 0, floorZ);
         return chunk;
@@ -117,7 +130,7 @@ public class World {
                 unloadedChunks.add(chunk);
             }
         }
-        chunks.removeAll(unloadedChunks);
+        for (Chunk c : unloadedChunks) removeChunk(c);
         // Load all missing chunks inside the range
         int loading = 0;
         for (float x = position.x - chunkLoadRange; x < position.x + chunkLoadRange; x += Chunk.WIDTH) {
@@ -126,13 +139,7 @@ public class World {
                 int floorZ = (int) Math.floor(z / Chunk.WIDTH) * Chunk.WIDTH;
                 if (position.distance(floorX, 0, floorZ) > chunkLoadRange) continue;
                 // Check if the chunk already exists
-                boolean chunkExists = false;
-                for (Chunk chunk : chunks) {
-                    if (chunk.origin.x == floorX && chunk.origin.z == floorZ) {
-                        chunkExists = true;
-                        break;
-                    }
-                }
+                boolean chunkExists = (chunkMap.containsKey(floorX) && chunkMap.get(floorX).containsKey(floorZ));
                 // If chunk does not exist, and it is not currently being loaded already
                 if (!chunkExists && !isBeingLoaded(new Vector3i(floorX, 0, floorZ))) {
                     Chunk chunk = new Chunk(this, floorX, 0, floorZ);
@@ -145,7 +152,7 @@ public class World {
                         worldGenerator.dispatch(this, chunk);
                         loading++;
                     } else { // Or add empty one
-                        chunks.add(chunk);
+                        addChunk(chunk);
                     }
                 }
             }
@@ -163,12 +170,16 @@ public class World {
      */
     public void gatherChunks() {
         List<Chunk> results = ChunkArchiver.gather();
-        chunks.addAll(results);
-        for (Chunk c : results) c.loadCalculatedMesh();
+        for (Chunk c : results) {
+            c.loadCalculatedMesh();
+            addChunk(c);
+        }
         if (worldGenerator == null) return;
         results = worldGenerator.gather();
-        chunks.addAll(results);
-        for (Chunk c : results) c.loadCalculatedMesh();
+        for (Chunk c : results) {
+            c.loadCalculatedMesh();
+            addChunk(c);
+        }
     }
 
     public Block getBlockFromPosition(Vector3f position) {

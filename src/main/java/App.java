@@ -202,7 +202,7 @@ public class App {
                 CommandLine.content = "";
             }
 
-            if (InputController.keyPressed(GLFW_KEY_E)) {
+            if (InputController.keyPressed(GLFW_KEY_E) && !CommandLine.show) {
                 BlockCatalog.show = !BlockCatalog.show;
                 if (BlockCatalog.show) glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
                 else glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);

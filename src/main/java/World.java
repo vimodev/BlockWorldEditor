@@ -95,17 +95,23 @@ public class World {
 
     public Chunk removeChunk(Chunk c) {
         chunks.remove(c);
-        chunkMap.get(c.origin.x).remove(c.origin.y);
+        chunkMap.get(c.origin.x).remove(c.origin.z);
+        if (chunkMap.get(c.origin.x).isEmpty()) chunkMap.remove(c.origin.x);
         return c;
+    }
+
+    public Chunk getChunkFromXZ(int x, int z) {
+        if (chunkMap.containsKey(x)) {
+            return chunkMap.get(x).get(z);
+        }
+        return null;
     }
 
     public Chunk getChunkFromPosition(Vector3f position) {
         int floorX = (int) Math.floor(position.x / Chunk.WIDTH) * Chunk.WIDTH;
         int floorZ = (int) Math.floor(position.z / Chunk.WIDTH) * Chunk.WIDTH;
-        if (chunkMap.containsKey(floorX) && chunkMap.get(floorX).containsKey(floorZ)) {
-            return chunkMap.get(floorX).get(floorZ);
-        }
-        Chunk chunk = new Chunk(this, floorX, 0, floorZ);
+        Chunk chunk = getChunkFromXZ(floorX, floorZ);
+        if (chunk == null) chunk = new Chunk(this, floorX, 0, floorZ);
         return chunk;
     }
 
@@ -139,7 +145,7 @@ public class World {
                 int floorZ = (int) Math.floor(z / Chunk.WIDTH) * Chunk.WIDTH;
                 if (position.distance(floorX, 0, floorZ) > chunkLoadRange) continue;
                 // Check if the chunk already exists
-                boolean chunkExists = (chunkMap.containsKey(floorX) && chunkMap.get(floorX).containsKey(floorZ));
+                boolean chunkExists = (getChunkFromXZ(floorX, floorZ) != null);
                 // If chunk does not exist, and it is not currently being loaded already
                 if (!chunkExists && !isBeingLoaded(new Vector3i(floorX, 0, floorZ))) {
                     Chunk chunk = new Chunk(this, floorX, 0, floorZ);

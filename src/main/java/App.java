@@ -29,6 +29,8 @@ public class App {
     public int WINDOW_HEIGHT = 1080;
     public String WINDOW_TITLE = "BlockWorldEditor";
 
+    public boolean previousFrameHadCursor;
+
     public long vg;
     public int font;
     public int textureImg;
@@ -144,6 +146,18 @@ public class App {
                     App.instance.world.camera.zNear,
                     App.instance.world.camera.zFar);
         });
+
+        // Window focus callback
+        glfwSetWindowFocusCallback(window.getWindow(), (long window, boolean focused) -> {
+           if (App.instance.window.getWindow() == window) {
+               App.instance.window.isFocused = focused;
+               if (focused) {
+                   glfwSetCursorPos(App.instance.window.getWindow(), WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+               }
+           }
+        });
+
+        previousFrameHadCursor = true;
     }
 
     /**
@@ -190,8 +204,17 @@ public class App {
             nvgBeginFrame(vg, WINDOW_WIDTH, WINDOW_HEIGHT, contentScaleY);
             
             // Apply input to the world or command line
-            if (!CommandLine.show) world.tick(this, dt);
-            else CommandLine.processInput();
+            if (window.isFocused) {
+                if (!CommandLine.show) {
+                    if (!previousFrameHadCursor) world.tick(this, dt);
+                    else glfwSetCursorPos(window.getWindow(), WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+                    previousFrameHadCursor = false;
+                }
+                else {
+                    CommandLine.processInput();
+                    previousFrameHadCursor = true;
+                }
+            }
 
             // Render the world
             if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

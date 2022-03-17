@@ -13,6 +13,8 @@ public class Window {
     private int height;
     private String title;
 
+    public boolean isFocused;
+
     /**
      * Creates a window with given properties
      * @param width of the window
@@ -23,6 +25,7 @@ public class Window {
         this.width = width;
         this.height = height;
         this.title = title;
+        this.isFocused = true;
 
         // Create the window in glfw
         window = glfwCreateWindow(width, height, title, 0, 0);

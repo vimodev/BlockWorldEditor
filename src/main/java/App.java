@@ -187,6 +187,8 @@ public class App {
             double dt = fps.dt();
             accumulatedTime += dt;
 
+            if (CommandLine.show || BlockCatalog.show) glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
             // Open and close command line
             if (InputController.keyPressed(GLFW_KEY_ENTER)) {
                 if (CommandLine.show) {
@@ -200,18 +202,26 @@ public class App {
                 CommandLine.content = "";
             }
 
+            if (InputController.keyPressed(GLFW_KEY_E)) {
+                BlockCatalog.show = !BlockCatalog.show;
+                if (BlockCatalog.show) glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                else glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+            }
+
             // All nano vg rendering must occur after this call
             nvgBeginFrame(vg, WINDOW_WIDTH, WINDOW_HEIGHT, contentScaleY);
             
             // Apply input to the world or command line
             if (window.isFocused) {
-                if (!CommandLine.show) {
+                if (!CommandLine.show && !BlockCatalog.show) {
                     if (!previousFrameHadCursor) world.tick(this, dt);
                     else glfwSetCursorPos(window.getWindow(), WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
                     previousFrameHadCursor = false;
-                }
-                else {
+                } else if (CommandLine.show){
                     CommandLine.processInput();
+                    previousFrameHadCursor = true;
+                } else if (BlockCatalog.show) {
+                    BlockCatalog.processInput();
                     previousFrameHadCursor = true;
                 }
             }
@@ -253,7 +263,7 @@ public class App {
         nvgFontSize(vg, fontSize);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
-        nvgText(vg, 10, y, "ESC to quit, F to fly, 1/2 for selecting, ENTER to open command line, type 'help' for commands");
+        nvgText(vg, 10, y, "ESC to quit, F to fly, 1/2 for selecting, E to open catalog, ENTER to open command line, type 'help' for commands");
         y += 15;
         // FPS counter
         nvgBeginPath(vg);
@@ -336,6 +346,10 @@ public class App {
         // Draw command line
         if (CommandLine.show) {
             CommandLine.draw(this);
+        }
+
+        if (BlockCatalog.show) {
+            BlockCatalog.draw();
         }
 
         glEnable(GL_CULL_FACE);

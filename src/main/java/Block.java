@@ -25,7 +25,12 @@ enum BlockType {
     BRICK(5),
     COBBLE(6),
     SAND(7),
-    WOOL_WHITE(8);
+    WOOL_WHITE(8),
+    LOG(9),
+    IRON(10),
+    GOLD(11),
+    SAND_STONE(12),
+    MUD(13);
 
     // Blocktype id, is a byte for small serialization size
     private final byte id;
@@ -65,17 +70,21 @@ public class Block {
     static final int increment = 16;
     static int texture = -1;
     // Locations of block type textures in the sprite map
-    static final Map<BlockType, Vector2i> textureLocation = Map.of(
-//            BlockType.NONE, new Vector2i(9, 1),
-            BlockType.GRASS, new Vector2i(1, 1),
-            BlockType.STONE, new Vector2i(1, 0),
-            BlockType.DIRT, new Vector2i(2, 0),
-            BlockType.PLANKS, new Vector2i(4, 0),
-            BlockType.BRICK, new Vector2i(7, 0),
-            BlockType.COBBLE, new Vector2i(0, 1),
-            BlockType.SAND, new Vector2i(2, 1),
-            BlockType.WOOL_WHITE, new Vector2i(0, 4)
-    );
+    static final Map<BlockType, Vector2i> textureLocation = new HashMap<>() {{
+        put(BlockType.GRASS, new Vector2i(1, 1));
+        put(BlockType.STONE, new Vector2i(1, 0));
+        put(BlockType.DIRT, new Vector2i(2, 0));
+        put(BlockType.PLANKS, new Vector2i(4, 0));
+        put(BlockType.BRICK, new Vector2i(7, 0));
+        put(BlockType.COBBLE, new Vector2i(0, 1));
+        put(BlockType.SAND, new Vector2i(2, 1));
+        put(BlockType.WOOL_WHITE, new Vector2i(0, 4));
+        put(BlockType.LOG, new Vector2i(4, 1));
+        put(BlockType.IRON, new Vector2i(6, 1));
+        put(BlockType.GOLD, new Vector2i(7, 1));
+        put(BlockType.SAND_STONE, new Vector2i(0, 11));
+        put(BlockType.MUD, new Vector2i(8, 6));
+    }};
     // A selected block has this texture coordinate
     static final Vector2i selectTextureLocation = new Vector2i(9, 1);
 

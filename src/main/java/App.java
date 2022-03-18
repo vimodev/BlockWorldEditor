@@ -1,3 +1,4 @@
+import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -379,6 +380,9 @@ public class App {
             h.append("Editing:\n");
             h.append("time <time>    Set time to <time> [0,2399]\n");
             h.append("time rate <rate>    Set time rate to <rate> [0,-]\n");
+            h.append("select <1/2>     Set selection 1/2 to current position\n");
+            h.append("copy     Copy contents of current selection\n");
+            h.append("paste     Paste contents at selection 1\n");
             h.append("set <type>    Set selection to <type>\n");
             h.append("replace <old_type> <type>    Set selection <old_type> to <type>\n");
             h.append("remove    Remove selection blocks\n");
@@ -465,6 +469,18 @@ public class App {
                     world.setLine(world.select1, world.select2, type);
                 } catch (IllegalArgumentException e) {};
             }
+        } else if (command.equals("copy")) {
+            if (world.select1 != null & world.select2 != null) {
+                world.toClipboard(world.select1, world.select2);
+            }
+        } else if (command.equals("paste")) {
+            if (world.select1 != null) {
+                world.fromClipboard(world.select1);
+            }
+        } else if (command.equals("select 1")) {
+            world.select1 = world.camera.position.floor(new Vector3f());
+        } else if (command.equals("select 2")) {
+            world.select2 = world.camera.position.floor(new Vector3f());
         }
         fps.dt();
     }

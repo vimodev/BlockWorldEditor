@@ -1,3 +1,4 @@
+import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.joml.Vector3i;
@@ -37,6 +38,7 @@ public class World {
     public Block select1Block;
     public Vector3f select2;
     public Block select2Block;
+    public HashMap<Vector3i, BlockType> clipboard;
 
     // Directional light (e.g. the sun)
     public Light dirLight = new Light(
@@ -61,29 +63,6 @@ public class World {
         chunks = new ArrayList<>();
         chunkMap = new HashMap<>();
         camera = new Camera(this);
-
-//        pointLights.add(new Light(
-//                new Vector3f(0f, 52f, 3f),
-//                new Vector3f(0.1f, 0.1f, 0.5f),
-//                new Vector3f(0.1f, 0.1f, 0.4f),
-//                new Vector3f(0.1f, 0.1f, 0.3f)
-//        ));
-//
-//        pointLights.add(new Light(
-//                new Vector3f(5f, 52f, 3f),
-//                new Vector3f(0.5f, 0.1f, 0.1f),
-//                new Vector3f(0.4f, 0.1f, 0.1f),
-//                new Vector3f(0.3f, 0.1f, 0.1f)
-//                ));
-//
-//        pointLights.add(new Light(
-//                new Vector3f(10f, 52f, 3f),
-//                new Vector3f(0.1f, 0.5f, 0.1f),
-//                new Vector3f(0.1f, 0.4f, 0.1f),
-//                new Vector3f(0.1f, 0.3f, 0.1f)
-//        ));
-
-
     }
 
     public Chunk addChunk(Chunk c) {
@@ -198,7 +177,7 @@ public class World {
     }
 
     // Add a block to its type list
-    public void addBlock(Block block, Vector3f position) {
+    public Block addBlock(Block block, Vector3f position) {
         Chunk chunk = getChunkFromPosition(position);
         int x = (int) Math.floor(position.x) % Chunk.WIDTH;
         int y = (int) Math.floor(position.y) % Chunk.HEIGHT;
@@ -206,6 +185,32 @@ public class World {
         if (x < 0) x += Chunk.WIDTH;
         if (z < 0) z += Chunk.WIDTH;
         chunk.setBlock(x, y, z, block);
+        return block;
+    }
+
+    public void toClipboard(Vector3f p1, Vector3f p2) {
+        Vector2i xRange = new Vector2i((int) Math.floor(Math.min(p1.x, p2.x)), (int) Math.floor(Math.max(p1.x, p2.x)) + 1);
+        Vector2i yRange = new Vector2i((int) Math.floor(Math.min(p1.y, p2.y)), (int) Math.floor(Math.max(p1.y, p2.y)) + 1);
+        Vector2i zRange = new Vector2i((int) Math.floor(Math.min(p1.z, p2.z)), (int) Math.floor(Math.max(p1.z, p2.z)) + 1);
+        clipboard = new HashMap<>();
+        for (int x = xRange.x; x <= xRange.y; x++) {
+            for (int y = yRange.x; y <= yRange.y; y++) {
+                for (int z = zRange.x; z <= zRange.y; z++) {
+                    Block b = getBlockFromPosition(new Vector3f(x, y, z));
+                    if (b != null) clipboard.put(new Vector3i(x - (int) Math.floor(p1.x), y - (int) Math.floor(p1.y), z - (int) Math.floor(p1.z)), b.type);
+                }
+            }
+        }
+    }
+
+    public void fromClipboard(Vector3f p) {
+        if (clipboard == null || clipboard.isEmpty()) return;
+        Set<Chunk> affectedChunks = new HashSet<>();
+        for (Vector3i key : clipboard.keySet()) {
+            Block b = addBlock(new Block(clipboard.get(key)), p.add(key.x, key.y, key.z, new Vector3f()));
+            affectedChunks.add(b.chunk);
+        }
+        for (Chunk c : affectedChunks) c.regenerateMesh();
     }
 
     public void removeBlocks(Vector3f p1, Vector3f p2) {

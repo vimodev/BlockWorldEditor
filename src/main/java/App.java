@@ -298,6 +298,13 @@ public class App {
             nvgText(vg, 10, y, "#chunks loading: -");
         }
         y += 15;
+        // # lights rendered
+        nvgBeginPath(vg);
+        nvgFontSize(vg, fontSize);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
+        nvgText(vg, 10, y, "#lights rendered: " + Renderer.lightsRendered);
+        y += 15;
         // Camera coordinates
         nvgBeginPath(vg);
         nvgFontSize(vg, fontSize);

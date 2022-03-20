@@ -17,6 +17,8 @@ public class Renderer {
 
     public static float RENDER_DISTANCE = 200f;
     public static int numberRendered = 0;
+    public static float LIGHT_RENDER_DISTANCE = 50f;
+    public static int lightsRendered = 0;
 
     public static void render(World world) {
         // Enable antialiasing
@@ -51,9 +53,15 @@ public class Renderer {
         // Add directional light from world
         world.dirLight.addToShaderAsDirLight(shader);
 
-        // Add point lights from world
-        for (int i = 0; i < world.pointLights.size(); i++) {
-            world.pointLights.get(i).addToShaderAsPointLight(shader, i);
+        // Get all point light from world (only from chunks to be rendered)
+        Light.clearShaderOfPointLights(shader, 1000);
+        lightsRendered = 0;
+        for (Chunk c : world.chunks) {
+            for (Light light : c.lightsMap.values()) {
+                if (!shouldLightRender(light, world.camera)) continue;
+                light.addToShaderAsPointLight(shader, lightsRendered);
+                lightsRendered++;
+            }
         }
 
         // Render each chunk's mesh
@@ -104,6 +112,13 @@ public class Renderer {
             }
         }
         return false;
+    }
+
+    private static boolean shouldLightRender(Light light, Camera camera) {
+        // Outside light render distance should not render
+        float hDistance = camera.position.distance(light.position);
+        if (hDistance > LIGHT_RENDER_DISTANCE) return false;
+        return true;
     }
 
 }

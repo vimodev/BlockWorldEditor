@@ -47,8 +47,6 @@ public class World {
             new Vector3f(0.8f, 0.7f, 0.7f),
             new Vector3f(0.1f, 0.1f, 0.1f)
     );
-    // All point lights (e.g. light blocks, torches)
-    public List<Light> pointLights = new ArrayList<Light>();
 
     public boolean flying = false;
 

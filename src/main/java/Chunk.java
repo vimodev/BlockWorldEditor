@@ -37,6 +37,9 @@ public class Chunk {
     // List of all blocks in the chunk, for easy iteration
     List<Block> blockList;
 
+    // List of all lights in the chunk
+    public HashMap<Vector3f, Light> lightsMap = new HashMap<>();
+
     // VAO that holds current mesh
     public boolean meshReady;
     public int mesh;
@@ -77,6 +80,12 @@ public class Chunk {
         modified = true;
         Block block = blocks[x][z][y];
         if (block == null) return null;
+
+        // Remove light for illuminating blocks (TODO: replace GOLD blocks with illuminating type?)
+        if (block.type == BlockType.GOLD) {
+            lightsMap.remove(new Vector3f(x, y, z));
+        }
+
         blockList.remove(block);
         blocks[x][z][y] = null;
         if (x - 1 >= 0 && blocks[x-1][z][y] != null) {
@@ -139,6 +148,13 @@ public class Chunk {
         }
         // Add to list
         blockList.add(block);
+
+        // Add light for illuminating blocks (TODO: replace GOLD blocks with illuminating type?)
+        if (block.type == BlockType.GOLD) {
+            lightsMap.put(
+                    new Vector3f(x, y, z),
+                    new Light(new Vector3f(x + origin.x + 0.5f, y + origin.y + 0.5f, z + origin.z + 0.5f)));
+        }
     }
 
     /**

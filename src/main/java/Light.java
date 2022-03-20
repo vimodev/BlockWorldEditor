@@ -79,4 +79,10 @@ public class Light {
         shader.setUniform("pointLights[" + i + "].linear", linear);
         shader.setUniform("pointLights[" + i + "].quadratic", quadratic);
     }
+
+    public static void clearShaderOfPointLights(Shader shader, int limit) {
+        for (int i = 0; i < limit; i++) {
+            shader.setUniform("pointLights[" + i + "].diffuse", new Vector3f(0.0f, 0.0f, 0.0f));
+        }
+    }
 }

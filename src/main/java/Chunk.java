@@ -146,6 +146,10 @@ public class Chunk {
             block.setFace(4, false);
             blocks[x][z][y+1].setFace(5, false);
         }
+        // We dont need the faces at the bottom of a chunk
+        if (y == 0) {
+            block.setFace(5, false);
+        }
         // Add to list
         blockList.add(block);
 
@@ -195,6 +199,7 @@ public class Chunk {
             float x = block.inChunkX; float y = block.inChunkY; float z = block.inChunkZ;
             // Go over all faces that need drawing
             for (int f = 0; f < 6; f++) {
+                // Render only faces that ought to be rendered
                 if (!block.getFace(f)) continue;
                 // Add all the vertex positions, textureCoords and normals for each face's vertices
                 for (int v = 0; v < 6; v++) {

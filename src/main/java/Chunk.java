@@ -14,6 +14,8 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Block container with a single mesh
@@ -26,6 +28,8 @@ public class Chunk {
 
     // Chunk parent world
     public World world;
+
+    public Lock lock;
 
     // 3d grid of blocks: x z y
     public Block[][][] blocks;
@@ -58,6 +62,7 @@ public class Chunk {
         this.vbos = new ArrayList<>();
         this.blockList = new ArrayList<>();
         this.meshReady = false;
+        this.lock = new ReentrantLock(true);
     }
 
     public Matrix4f getTransformationMatrix() {
@@ -77,6 +82,7 @@ public class Chunk {
     }
 
     public Block removeBlock(int x, int y, int z) {
+        lock.lock();
         modified = true;
         Block block = blocks[x][z][y];
         if (block == null) return null;
@@ -106,6 +112,7 @@ public class Chunk {
         if (y + 1 < Chunk.HEIGHT && blocks[x][z][y+1] != null) {
             blocks[x][z][y+1].setFace(5, true);
         }
+        lock.unlock();
         return block;
     }
 
@@ -117,6 +124,7 @@ public class Chunk {
      * @param block
      */
     public void setBlock(int x, int y, int z, Block block) {
+        lock.lock();
         modified = true;
         blocks[x][z][y] = block;
         block.inChunkX = (short) x; block.inChunkY = (short) y; block.inChunkZ = (short) z;
@@ -159,6 +167,7 @@ public class Chunk {
                     new Vector3f(x, y, z),
                     new Light(new Vector3f(x + origin.x + 0.5f, y + origin.y + 0.5f, z + origin.z + 0.5f)));
         }
+        lock.unlock();
     }
 
     /**
@@ -179,6 +188,7 @@ public class Chunk {
      * must be done by main thread
      */
     public void calculateMesh() {
+        lock.lock();
         positions = new ArrayList<>();
         textureCoords = new ArrayList<>();
         normals = new ArrayList<>();
@@ -217,6 +227,8 @@ public class Chunk {
             }
         }
         vertexCount = positions.size() / 3;
+        meshReady = false;
+        lock.unlock();
     }
 
     /**
@@ -224,6 +236,7 @@ public class Chunk {
      * DANGER!!!! MESH DATA MUST BE CALCULATED
      */
     public void loadCalculatedMesh() {
+        lock.lock();
         unloadMesh();
         mesh = GL30.glGenVertexArrays();
         GL30.glBindVertexArray(mesh);
@@ -266,6 +279,7 @@ public class Chunk {
         positions = null;
         normals = null;
         textureCoords = null;
+        lock.unlock();
     }
 
     /**
@@ -277,6 +291,7 @@ public class Chunk {
     }
 
     public static File toFile(Chunk chunk) {
+        chunk.lock.lock();
         try {
             File file = Files.createTempFile("bwe", ".chunk").toFile();
             FileOutputStream fos = new FileOutputStream(file);
@@ -293,10 +308,12 @@ public class Chunk {
             oos.writeObject(blockIds);
             fos.close();
             oos.close();
+            chunk.lock.unlock();
             return file;
         } catch (IOException e) {
             e.printStackTrace();
         }
+        chunk.lock.unlock();
         return null;
     }
 

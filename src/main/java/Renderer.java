@@ -69,6 +69,7 @@ public class Renderer {
         for (Chunk c : world.chunks) {
             // Check if we should render the chunk
             if (!shouldChunkRender(c, world.camera)) continue;
+            if (!c.meshReady) c.loadCalculatedMesh();
             // Otherwise we render the chunk
             numberRendered++;
             shader.setUniform("transformationMatrix", c.getTransformationMatrix());

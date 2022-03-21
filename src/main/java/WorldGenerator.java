@@ -10,7 +10,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public abstract class WorldGenerator {
 
     // Currently running jobs
-    public List<Thread> jobs;
+    public HashMap<Thread, GenerationJob> jobs;
+    private Lock jobLock;
     // All keys of chunks that are currently either running or in the queue
     public Set<Vector3i> inProgress;
     // Chunks that are done and need to be gathered by main thread
@@ -21,7 +22,8 @@ public abstract class WorldGenerator {
     public HashMap<String, String> config;
 
     public WorldGenerator() {
-        jobs = new ArrayList<>();
+        jobs = new HashMap<>();
+        jobLock = new ReentrantLock(true);
         inProgress = new HashSet<>();
         chunkQueue = new ArrayList<>();
         chunkQueueLock = new ReentrantLock(true);
@@ -42,9 +44,12 @@ public abstract class WorldGenerator {
      * @param chunk
      */
     public void dispatch(World world, Chunk chunk) {
-        Thread thread = new Thread(new GenerationJob(this, world, chunk));
-        jobs.add(thread);
+        GenerationJob job = new GenerationJob(this, world, chunk);
+        Thread thread = new Thread(job);
+        jobLock.lock();
+        jobs.put(thread, job);
         inProgress.add(chunk.origin);
+        jobLock.unlock();
         thread.start();
     }
 
@@ -55,7 +60,8 @@ public abstract class WorldGenerator {
      */
     public List<Chunk> gather() {
         List<Thread> finished = new ArrayList<>();
-        for (Thread thread : jobs) {
+        jobLock.lock();
+        for (Thread thread : jobs.keySet()) {
             if (!thread.isAlive()) {
                 finished.add(thread);
             }
@@ -67,9 +73,10 @@ public abstract class WorldGenerator {
                 e.printStackTrace();
             }
         }
-        jobs.removeAll(finished);
+        for (Thread thread : finished) jobs.remove(thread);
         List<Chunk> results = clearQueue();
         for (Chunk c : results) inProgress.remove(c.origin);
+        jobLock.unlock();
         return results;
     }
 

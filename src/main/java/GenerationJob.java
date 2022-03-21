@@ -113,7 +113,7 @@ public class GenerationJob implements Runnable {
         // Set parent world
         chunk.world = world;
         // Fix faces on sides of chunk
-        fixSides();
+//        fixSides();
         // Calculate the mesh
         chunk.calculateMesh();
         // And add it to the 'done' queue

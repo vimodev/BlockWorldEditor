@@ -27,6 +27,8 @@ uniform PointLight pointLights[NR_POINT_LIGHTS];
 
 uniform sampler2D textureSampler;
 uniform vec3 viewPosition;
+uniform float renderDistance;
+uniform vec3 skyColor;
 
 in vec2 pass_textureCoords;
 in vec3 fragPosition;
@@ -88,4 +90,10 @@ void main() {
 
     // compute full light
     pixel_colour = vec4(result, 1.0) * objectColor;
+
+    // Fog
+    float gradient = 0.0225;
+    float distance = length(fragPosition.xz - viewPosition.xz);
+    float visibility = clamp(-gradient * (distance - renderDistance - 10), 0.0, 1.0);
+    pixel_colour = mix(vec4(skyColor, 1.0), pixel_colour, visibility);
 }

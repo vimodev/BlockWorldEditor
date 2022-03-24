@@ -25,10 +25,11 @@ public class World {
     public HashMap<Integer, HashMap<Integer, Chunk>> chunkMap;
 
     // Chunks inside this range should be loaded
-    public static float chunkLoadRange = 256f;
+    public static float chunkLoadRange = Renderer.RENDER_DISTANCE * 1.30f;
     // Chunks outside this range should be unloaded
-    public static float chunkUnloadRange = 384f;
+    public static float chunkUnloadRange = chunkLoadRange + 128f;
 
+    public Vector3f peakSkyColor = new Vector3f(0.2f, 0.6f, 0.8f);
     public Vector3f skyColor;
 
     public float time = 800f;
@@ -43,7 +44,7 @@ public class World {
     // Directional light (e.g. the sun)
     public Light dirLight = new Light(
             new Vector3f(0f,-1f,0f),
-            new Vector3f(0.1f, 0.1f, 0.1f),
+            new Vector3f(0.2f, 0.2f, 0.2f),
             new Vector3f(0.8f, 0.7f, 0.7f),
             new Vector3f(0.1f, 0.1f, 0.1f)
     );
@@ -57,7 +58,7 @@ public class World {
 
     public World(App app) {
         this.app = app;
-        skyColor = new Vector3f(0.2f, 0.6f, 0.8f);
+        skyColor = new Vector3f(peakSkyColor);
         chunks = new ArrayList<>();
         chunkMap = new HashMap<>();
         camera = new Camera(this);
@@ -328,6 +329,9 @@ public class World {
         // Reposition sun based on time
         dirLight.position = new Vector3f(0, 1, 0);
         dirLight.position.rotateX((time / 2400f) * 2 * (float) Math.PI);
+        double skyColorMultiplier = Math.sqrt((Math.sin((time - 600.0) * Math.PI * 2.0 / 2400.0) + 1) / 2);
+        skyColorMultiplier = Math.max(skyColorMultiplier, 0.15f);
+        skyColor = peakSkyColor.mul((float) skyColorMultiplier, new Vector3f());
 
         if (InputController.keyPressed(GLFW_KEY_F)) {
             flying = !flying;

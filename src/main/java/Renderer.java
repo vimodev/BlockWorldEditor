@@ -46,6 +46,11 @@ public class Renderer {
         // Set view/camera position
         shader.setUniform("viewPosition", world.camera.position);
 
+        // Set render distance
+        shader.setUniform("renderDistance", RENDER_DISTANCE);
+        // Set sky color
+        shader.setUniform("skyColor", world.skyColor);
+
         // Enable the block texture
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         GL11.glBindTexture(GL_TEXTURE_2D, Block.texture);

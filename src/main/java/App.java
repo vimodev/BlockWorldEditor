@@ -413,7 +413,11 @@ public class App {
                 String[] split = command.split(" ");
                 try {
                     int dist = Integer.parseInt(split[split.length - 1]);
-                    if (dist >= 0) Renderer.RENDER_DISTANCE = dist;
+                    if (dist >= 0) {
+                        Renderer.RENDER_DISTANCE = dist;
+                        World.chunkLoadRange = dist * 1.25f;
+                        World.chunkUnloadRange = World.chunkLoadRange + 128f;
+                    }
                 } catch (NumberFormatException e) {};
             }
         } else if (command.startsWith("vsync")) {

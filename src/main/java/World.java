@@ -16,10 +16,10 @@ import static org.lwjgl.glfw.GLFW.*;
 public class World {
 
     // App reference for global access
-    private App app;
+    App app;
 
     public Camera camera;
-
+    public Sun sun;
     public HillWorldGenerator worldGenerator;
     public List<Chunk> chunks;
     public HashMap<Integer, HashMap<Integer, Chunk>> chunkMap;
@@ -32,22 +32,14 @@ public class World {
     public Vector3f peakSkyColor = new Vector3f(0.2f, 0.6f, 0.8f);
     public Vector3f skyColor;
 
-    public float time = 800f;
-    public float timeRate = 15f;
+    public float time = 0f;
+    public float timeRate = 0f;
 
     public Vector3f select1;
     public Block select1Block;
     public Vector3f select2;
     public Block select2Block;
     public HashMap<Vector3i, BlockType> clipboard;
-
-    // Directional light (e.g. the sun)
-    public Light dirLight = new Light(
-            new Vector3f(0f,-1f,0f),
-            new Vector3f(0.2f, 0.2f, 0.2f),
-            new Vector3f(0.8f, 0.7f, 0.7f),
-            new Vector3f(0.1f, 0.1f, 0.1f)
-    );
 
     public boolean flying = false;
 
@@ -62,6 +54,7 @@ public class World {
         chunks = new ArrayList<>();
         chunkMap = new HashMap<>();
         camera = new Camera(this);
+        sun = new Sun(this);
     }
 
     public Chunk addChunk(Chunk c) {
@@ -327,8 +320,7 @@ public class World {
         time += timeRate * (float) dt;
         if (time >= 2400f) time -= 2400f;
         // Reposition sun based on time
-        dirLight.position = new Vector3f(0, 1, 0);
-        dirLight.position.rotateX((time / 2400f) * 2 * (float) Math.PI);
+        sun.setTime(time, camera.position);
         double skyColorMultiplier = Math.sqrt((Math.sin((time - 600.0) * Math.PI * 2.0 / 2400.0) + 1) / 2);
         skyColorMultiplier = Math.max(skyColorMultiplier, 0.15f);
         skyColor = peakSkyColor.mul((float) skyColorMultiplier, new Vector3f());
@@ -381,6 +373,8 @@ public class World {
             camera.walkMove(app, dt);
         }
 
+//        sun.setX(camera.position.x);
+//        sun.setZ(camera.position.z);
     }
 
     public void render() {

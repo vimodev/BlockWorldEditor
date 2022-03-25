@@ -1,7 +1,5 @@
 #version 330 core
 
-// mostly following https://learnopengl.com/Lighting/Multiple-lights
-
 struct DirLight {
     vec3 direction;
 
@@ -29,15 +27,17 @@ uniform sampler2D textureSampler;
 uniform vec3 viewPosition;
 uniform float renderDistance;
 uniform vec3 skyColor;
+uniform sampler2D shadowMap;
 
 in vec2 pass_textureCoords;
 in vec3 fragPosition;
 in vec3 fragNormal;
+in vec4 shadowPosition;
 
 out vec4 pixel_colour;
 
-vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
-    vec3 lightDir = normalize(-light.direction);
+vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, float shadow) {
+    vec3 lightDir = normalize(light.direction);
     // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
     // specular shading
@@ -47,7 +47,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
     vec3 ambient  = light.ambient;
     vec3 diffuse  = light.diffuse  * diff;
     vec3 specular = light.specular * spec;
-    return (ambient + diffuse + specular);
+    return (ambient + diffuse*shadow + specular*shadow);
 }
 
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
@@ -71,25 +71,47 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
     return (ambient + diffuse + specular);
 }
 
+float calcShadow(vec4 position) {
+    // Transform from screen coordinates to texture coordinates
+    vec3 projCoords = position.xyz;
+    projCoords = projCoords * 0.5 + 0.5;
+    float bias = 0.001;
+
+    float shadowFactor = 0.0;
+    vec2 inc = 1.0 / textureSize(shadowMap, 0);
+    for(int row = -1; row <= 1; ++row)
+    {
+        for(int col = -1; col <= 1; ++col)
+        {
+            float textDepth = texture(shadowMap, projCoords.xy + vec2(row, col) * inc).r;
+            shadowFactor += projCoords.z - bias > textDepth ? 1.0 : 0.0;
+        }
+    }
+    shadowFactor /= 9.0;
+
+    return 1 - shadowFactor;
+}
+
 void main() {
     // properties
     vec3 norm = normalize(fragNormal);
     vec3 viewDir = normalize(viewPosition - fragPosition);
 
     // phase 1: Directional lighting
-    vec3 result = CalcDirLight(dirLight, norm, viewDir);
+    float shadow = calcShadow(shadowPosition);
+    vec3 lightColor = CalcDirLight(dirLight, norm, viewDir, shadow);
     // phase 2: Point lights
     for(int i = 0; i < NR_POINT_LIGHTS; i++) {
         // if diffuse is black, the lights are undefined, we have handled all lights!
         if (pointLights[i].diffuse == vec3(0.0,0.0,0.0)) break;
-        result += CalcPointLight(pointLights[i], norm, fragPosition, viewDir);
+        lightColor += CalcPointLight(pointLights[i], norm, fragPosition, viewDir);
     }
 
     // get object color from texture
     vec4 objectColor = texture(textureSampler, pass_textureCoords);
 
     // compute full light
-    pixel_colour = vec4(result, 1.0) * objectColor;
+    pixel_colour = vec4(lightColor, 1.0) * objectColor;
 
     // Fog
     float gradient = 0.0225;

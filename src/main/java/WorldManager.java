@@ -73,18 +73,18 @@ public class WorldManager {
             world.camera.yaw = worldJSON.getJSONObject("camera").getJSONObject("rotation").getFloat("yaw");
             world.camera.roll = worldJSON.getJSONObject("camera").getJSONObject("rotation").getFloat("roll");
             // Set directional light state
-            world.dirLight.position.x = worldJSON.getJSONObject("dirLight").getJSONObject("position").getFloat("x");
-            world.dirLight.position.y = worldJSON.getJSONObject("dirLight").getJSONObject("position").getFloat("y");
-            world.dirLight.position.z = worldJSON.getJSONObject("dirLight").getJSONObject("position").getFloat("z");
-            world.dirLight.ambient.x = worldJSON.getJSONObject("dirLight").getJSONObject("ambient").getFloat("r");
-            world.dirLight.ambient.y = worldJSON.getJSONObject("dirLight").getJSONObject("ambient").getFloat("g");
-            world.dirLight.ambient.z = worldJSON.getJSONObject("dirLight").getJSONObject("ambient").getFloat("b");
-            world.dirLight.diffuse.x = worldJSON.getJSONObject("dirLight").getJSONObject("diffuse").getFloat("r");
-            world.dirLight.diffuse.y = worldJSON.getJSONObject("dirLight").getJSONObject("diffuse").getFloat("g");
-            world.dirLight.diffuse.z = worldJSON.getJSONObject("dirLight").getJSONObject("diffuse").getFloat("b");
-            world.dirLight.specular.x = worldJSON.getJSONObject("dirLight").getJSONObject("specular").getFloat("r");
-            world.dirLight.specular.y = worldJSON.getJSONObject("dirLight").getJSONObject("specular").getFloat("g");
-            world.dirLight.specular.z = worldJSON.getJSONObject("dirLight").getJSONObject("specular").getFloat("b");
+            world.sun.getLight().position.x = worldJSON.getJSONObject("dirLight").getJSONObject("position").getFloat("x");
+            world.sun.getLight().position.y = worldJSON.getJSONObject("dirLight").getJSONObject("position").getFloat("y");
+            world.sun.getLight().position.z = worldJSON.getJSONObject("dirLight").getJSONObject("position").getFloat("z");
+            world.sun.getLight().ambient.x = worldJSON.getJSONObject("dirLight").getJSONObject("ambient").getFloat("r");
+            world.sun.getLight().ambient.y = worldJSON.getJSONObject("dirLight").getJSONObject("ambient").getFloat("g");
+            world.sun.getLight().ambient.z = worldJSON.getJSONObject("dirLight").getJSONObject("ambient").getFloat("b");
+            world.sun.getLight().diffuse.x = worldJSON.getJSONObject("dirLight").getJSONObject("diffuse").getFloat("r");
+            world.sun.getLight().diffuse.y = worldJSON.getJSONObject("dirLight").getJSONObject("diffuse").getFloat("g");
+            world.sun.getLight().diffuse.z = worldJSON.getJSONObject("dirLight").getJSONObject("diffuse").getFloat("b");
+            world.sun.getLight().specular.x = worldJSON.getJSONObject("dirLight").getJSONObject("specular").getFloat("r");
+            world.sun.getLight().specular.y = worldJSON.getJSONObject("dirLight").getJSONObject("specular").getFloat("g");
+            world.sun.getLight().specular.z = worldJSON.getJSONObject("dirLight").getJSONObject("specular").getFloat("b");
             // Reset the archiver and repopulate with the newly loaded stuff
             ChunkArchiver.reset();
             JSONArray chunkIndex = worldJSON.getJSONArray("chunks");
@@ -168,7 +168,7 @@ public class WorldManager {
         JSONObject cameraJSON = world.camera.toJSON();
         worldJSON.put("camera", cameraJSON);
         // Export dir light to json
-        JSONObject dirLight = world.dirLight.toJSON();
+        JSONObject dirLight = world.sun.getLight().toJSON();
         worldJSON.put("dirLight", dirLight);
         // Set generator
         JSONObject genJSON = new JSONObject(world.worldGenerator.config);

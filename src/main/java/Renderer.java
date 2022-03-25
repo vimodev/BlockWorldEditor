@@ -93,7 +93,7 @@ public class Renderer {
         // Set render distance
         shader.setUniform("renderDistance", RENDER_DISTANCE);
         // Set sky color
-        shader.setUniform("skyColor", new Vector3f(1f,1f,1f));
+        shader.setUniform("skyColor", world.skyColor);
 
         // Enable the block texture
         glActiveTexture(GL_TEXTURE0);

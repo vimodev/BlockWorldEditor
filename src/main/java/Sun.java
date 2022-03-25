@@ -25,13 +25,13 @@ public class Sun {
                 new Vector3f(0.1f, 0.1f, 0.1f)
         );
 
-        this.position = new Vector3f(0, 200, 0);
-
         this.shadowMap = new ShadowMap();
+
+        this.position = new Vector3f(0f, 400f, 0f);
 
         this.projection = new Matrix4f();
         this.projection.identity();
-        this.projection.setOrtho(-100.0f, 100.0f, -100.0f, 100.00f, -1.0f, 500.0f);
+        this.projection.setOrtho(-250.0f, 250.0f, -250.0f, 250.00f, -1.0f, 1000.0f);
     }
 
     public void setTime(float time, Vector3f position) {
@@ -39,7 +39,7 @@ public class Sun {
         this.directionalLight.position.rotateZ((time / 2400f) * 2 * (float) Math.PI);
         this.directionalLight.position.normalize();
 
-        this.position = new Vector3f(0f, 300f, 0f);
+        this.position = new Vector3f(0f, 400f, 0f);
         this.position.rotateZ((time / 2400f) * 2 * (float) Math.PI);
         this.position.add(position);
     }

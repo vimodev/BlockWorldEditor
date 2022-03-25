@@ -75,7 +75,7 @@ float calcShadow(vec4 position) {
     // Transform from screen coordinates to texture coordinates
     vec3 projCoords = position.xyz;
     projCoords = projCoords * 0.5 + 0.5;
-    float bias = 0.001;
+    float bias = 0.0005;
 
     float shadowFactor = 0.0;
     vec2 inc = 1.0 / textureSize(shadowMap, 0);

@@ -73,7 +73,7 @@ public class Renderer {
 
         // -- SHADOW MAPPING DONE, continue with rendering from player perspective ->
 
-        glViewport(0, 0, world.app.WINDOW_WIDTH, world.app.WINDOW_HEIGHT);
+        glViewport(0, 0, world.app.window.getWidth(), world.app.window.getHeight());
 
         // Use default shader
         Shader shader = defaultShader;

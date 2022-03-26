@@ -35,12 +35,12 @@ public class Sun {
     }
 
     public void setTime(float time, Vector3f position) {
-        this.directionalLight.position = new Vector3f(0f, 1f, 0f);
-        this.directionalLight.position.rotateZ((time / 2400f) * 2 * (float) Math.PI);
+        this.directionalLight.position = new Vector3f(1f, 1f, 1f);
+        this.directionalLight.position.rotateX((time / 2400f) * 2 * (float) Math.PI);
         this.directionalLight.position.normalize();
 
-        this.position = new Vector3f(0f, 400f, 0f);
-        this.position.rotateZ((time / 2400f) * 2 * (float) Math.PI);
+        this.position = new Vector3f(0, 200f, 0);
+//        this.position.rotateZ((time / 2400f) * 2 * (float) Math.PI);
         this.position.add(position);
     }
 

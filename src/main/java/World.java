@@ -33,7 +33,7 @@ public class World {
     public Vector3f skyColor;
 
     public float time = 0f;
-    public float timeRate = 0f;
+    public float timeRate = 100f;
 
     public Vector3f select1;
     public Block select1Block;

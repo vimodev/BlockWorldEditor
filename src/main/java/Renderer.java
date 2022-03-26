@@ -54,7 +54,7 @@ public class Renderer {
         // Render each chunk's mesh
         for (Chunk c : world.chunks) {
             // Check if we should render the chunk
-            //if (!shouldChunkRender(c, world.camera)) continue;
+            if (!shouldChunkRender(c, world.camera)) continue;
             // Otherwise we render the chunk
             numberRendered++;
             Matrix4f shadowTransformationViewMatrix = new Matrix4f(world.sun.getTransformation());
@@ -115,6 +115,8 @@ public class Renderer {
 
         // Render each chunk's mesh
         numberRendered = 0;
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, world.sun.getShadowMap().getDepthMapTexture().getId());
         for (Chunk c : world.chunks) {
             // Check if we should render the chunk
             if (!shouldChunkRender(c, world.camera)) continue;
@@ -130,10 +132,6 @@ public class Renderer {
             GL20.glEnableVertexAttribArray(0); // Vertices
             GL20.glEnableVertexAttribArray(1); // Texture coords
             GL20.glEnableVertexAttribArray(2); // Normals
-
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, world.sun.getShadowMap().getDepthMapTexture().getId());
-
             glDrawArrays(GL_TRIANGLES, 0, c.vertexCount);
         }
 

@@ -341,7 +341,14 @@ public class App {
         nvgFontSize(vg, fontSize);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
-        nvgText(vg, 20, y, "Sun direction: " + String.format("(X:%.1f  Y:%.1f  Z:%.1f)",  world.sun.getDirection().x, world.sun.getDirection().y, world.sun.getDirection().z));
+        nvgText(vg, 20, y, "Sun direction: " + String.format("(X:%.1f  Y:%.1f  Z:%.1f) (%.2fpi)",  world.sun.getDirection().x, world.sun.getDirection().y, world.sun.getDirection().z, ((world.time/1200f)+1)%2));
+        y += 15;
+        // Darkness
+        nvgBeginPath(vg);
+        nvgFontSize(vg, fontSize);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
+        nvgText(vg, 20, y, "Darkness: " + String.format("%.2f", world.sun.getTimeMultiplier(world.time)));
         y += 15;
 
         // Spacer

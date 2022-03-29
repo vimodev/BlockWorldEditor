@@ -9,6 +9,12 @@ public class Sun {
     private World world;
     private Light directionalLight;
 
+
+    private float dawn = 400;
+    private float sunrise = 800;
+    private float sunset = 1600;
+    private float dusk = 2000;
+
     // Should be positioned right above player to prevent issues with shadow mapping
     private Vector3f position;
 
@@ -27,21 +33,42 @@ public class Sun {
 
         this.shadowMap = new ShadowMap();
 
-        this.position = new Vector3f(0f, 400f, 0f);
+        this.position = new Vector3f();
 
         this.projection = new Matrix4f();
         this.projection.identity();
-        this.projection.setOrtho(-250.0f, 250.0f, -250.0f, 250.00f, -1.0f, 1000.0f);
+        this.projection.setOrtho(-1000.0f, 1000.0f, -1000.0f, 1000.00f, -1.0f, 5000.0f);
+    }
+
+    private static float map(float a0, float a1, float b0, float b1, float x) {
+        float a_range = (a1 - a0);
+        float b_range = (b1 - b0);
+        if (x <= a0) return b0;
+        if (x >= a1) return b1;
+        return (((x - a0) * b_range) / a_range) + b0;
     }
 
     public void setTime(float time, Vector3f position) {
-        this.directionalLight.position = new Vector3f(1f, 1f, 1f);
-        this.directionalLight.position.rotateX((time / 2400f) * 2 * (float) Math.PI);
+        float y = map(dawn, dusk, 1.5f, 2.5f, time);
+        this.directionalLight.position = new Vector3f(0f, 1f, 0f);
+        this.directionalLight.position.rotateX(y * (float) Math.PI);
         this.directionalLight.position.normalize();
 
-        this.position = new Vector3f(0, 200f, 0);
-//        this.position.rotateZ((time / 2400f) * 2 * (float) Math.PI);
+        this.position = new Vector3f(0, 100f, 0);
         this.position.add(position);
+    }
+
+    public float getTimeMultiplier(float time) {
+        if (time > sunrise && time < sunset) {
+            return 1.0f;
+        }
+        if (time <= sunrise) {
+            return (float) Math.pow((time/sunrise), 5);
+        }
+        if (time >= sunset) {
+            return (float) Math.pow(((2400-time)/sunrise), 5);
+        }
+        return time;
     }
 
     public Light getLight() {

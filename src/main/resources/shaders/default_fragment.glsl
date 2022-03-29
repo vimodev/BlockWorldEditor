@@ -28,6 +28,7 @@ uniform vec3 viewPosition;
 uniform float renderDistance;
 uniform vec3 skyColor;
 uniform sampler2D shadowMap;
+uniform float fullShadow;
 
 in vec2 pass_textureCoords;
 in vec3 fragPosition;
@@ -47,7 +48,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, float shadow) {
     vec3 ambient  = light.ambient;
     vec3 diffuse  = light.diffuse  * diff;
     vec3 specular = light.specular * spec;
-    return (ambient + diffuse*shadow + specular*shadow);
+    return (ambient + diffuse*shadow + specular*shadow)*fullShadow;
 }
 
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
@@ -75,14 +76,12 @@ float calcShadow(vec4 position) {
     // Transform from screen coordinates to texture coordinates
     vec3 projCoords = position.xyz;
     projCoords = projCoords * 0.5 + 0.5;
-    float bias = 0.0005;
+    float bias = 0.001;
 
     float shadowFactor = 0.0;
     vec2 inc = 1.0 / textureSize(shadowMap, 0);
-    for(int row = -1; row <= 1; ++row)
-    {
-        for(int col = -1; col <= 1; ++col)
-        {
+    for(int row = -1; row <= 1; ++row) {
+        for(int col = -1; col <= 1; ++col) {
             float textDepth = texture(shadowMap, projCoords.xy + vec2(row, col) * inc).r;
             shadowFactor += projCoords.z - bias > textDepth ? 1.0 : 0.0;
         }

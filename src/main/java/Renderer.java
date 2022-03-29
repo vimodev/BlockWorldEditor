@@ -94,6 +94,8 @@ public class Renderer {
         shader.setUniform("renderDistance", RENDER_DISTANCE);
         // Set sky color
         shader.setUniform("skyColor", world.skyColor);
+        // Set time multiplier
+        shader.setUniform("fullShadow", world.sun.getTimeMultiplier(world.time));
 
         // Enable the block texture
         glActiveTexture(GL_TEXTURE0);

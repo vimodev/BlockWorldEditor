@@ -15,6 +15,8 @@ public class Sun {
     private float sunset = 1600;
     private float dusk = 2000;
 
+    public float lastUpdate = 0f;
+
     // Should be positioned right above player to prevent issues with shadow mapping
     private Vector3f position;
 
@@ -37,7 +39,7 @@ public class Sun {
 
         this.projection = new Matrix4f();
         this.projection.identity();
-        this.projection.setOrtho(-1000.0f, 1000.0f, -1000.0f, 1000.00f, -1.0f, 5000.0f);
+        this.projection.setOrtho(-250.0f, 250.0f, -250.0f, 250.00f, -1.0f, 500.0f);
     }
 
     private static float map(float a0, float a1, float b0, float b1, float x) {
@@ -49,24 +51,27 @@ public class Sun {
     }
 
     public void setTime(float time, Vector3f position) {
-        float y = map(dawn, dusk, 1.5f, 2.5f, time);
-        this.directionalLight.position = new Vector3f(0f, 1f, 0f);
-        this.directionalLight.position.rotateX(y * (float) Math.PI);
-        this.directionalLight.position.normalize();
+        if (Math.abs(this.lastUpdate - time) > 5) {
+            float y = map(this.dawn, this.dusk, 1.5f, 2.5f, time);
+            this.directionalLight.position = new Vector3f(0f, 1f, 0f);
+            this.directionalLight.position.rotateX(y * (float) Math.PI);
+            this.directionalLight.position.normalize();
 
-        this.position = new Vector3f(0, 100f, 0);
-        this.position.add(position);
+            this.position = new Vector3f(0, 100f, 0);
+            this.position.add(position);
+            this.lastUpdate = time;
+        }
     }
 
     public float getTimeMultiplier(float time) {
-        if (time > sunrise && time < sunset) {
+        if (time > this.sunrise && time < this.sunset) {
             return 1.0f;
         }
-        if (time <= sunrise) {
-            return (float) Math.pow((time/sunrise), 5);
+        if (time <= this.sunrise) {
+            return (float) Math.pow((time/this.sunrise), 7);
         }
-        if (time >= sunset) {
-            return (float) Math.pow(((2400-time)/sunrise), 5);
+        if (time >= this.sunset) {
+            return (float) Math.pow(((2400-time)/this.sunrise), 7);
         }
         return time;
     }

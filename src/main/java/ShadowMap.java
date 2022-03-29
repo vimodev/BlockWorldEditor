@@ -5,9 +5,9 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class ShadowMap {
 
-    public static final int SHADOW_MAP_WIDTH = 1024*4;
+    public static final int SHADOW_MAP_WIDTH = 1024*16;
 
-    public static final int SHADOW_MAP_HEIGHT = 1024*4;
+    public static final int SHADOW_MAP_HEIGHT = 1024*16;
 
     private final int depthMapFBO;
 

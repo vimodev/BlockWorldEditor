@@ -17,6 +17,7 @@ public class Renderer {
 
     public static Shader defaultShader = new DefaultShader();
     public static Shader depthShader = new DepthShader();
+    public static Shader skyboxShader = new SkyboxShader();
 
     public static float RENDER_DISTANCE = 200f;
     public static int numberRendered = 0;
@@ -39,6 +40,7 @@ public class Renderer {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         // -- SHADOW MAPPING ->
+        glDisable(GL_CULL_FACE);
 
         // Setup view port to match the texture size
         glBindFramebuffer(GL_FRAMEBUFFER, world.sun.getShadowMap().getDepthMapFBO());
@@ -69,11 +71,48 @@ public class Renderer {
 
         depthShader.unuse();
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+        glEnable(GL_CULL_FACE);
 
         // -- SHADOW MAPPING DONE, continue with rendering from player perspective ->
 
         glViewport(0, 0, world.app.window.getWidth(), world.app.window.getHeight());
+
+
+        // SETUP SKYBOX ---
+        glDisable(GL_CULL_FACE);
+
+        skyboxShader.use();
+
+        skyboxShader.setUniform("texture_sampler", 0);
+
+        // Update projection Matrix
+        skyboxShader.setUniform("projectionMatrix", world.camera.getProjection());
+
+        // Set time multiplier
+        skyboxShader.setUniform("fullShadow", world.sun.getTimeMultiplier(world.time));
+
+        Skybox skybox = world.sun.getSkybox();
+        Matrix4f viewMatrix = world.camera.getTransformation();
+        viewMatrix.m30(0);
+        viewMatrix.m31(0);
+        viewMatrix.m32(0);
+        Vector3f skyboxRotation = skybox.getRotation();
+        Vector3f skyboxPosition = skybox.getPosition();
+        float skyboxScale = skybox.getScale();
+        Matrix4f modelViewMatrix = new Matrix4f();
+        modelViewMatrix.identity().translate(skyboxPosition).
+                rotateX(-skyboxRotation.x).
+                rotateY(-skyboxRotation.y).
+                rotateZ(-skyboxRotation.z).
+                scale(skyboxScale);
+        Matrix4f viewCurr = new Matrix4f(viewMatrix);
+        viewCurr.mul(modelViewMatrix);
+        skyboxShader.setUniform("modelViewMatrix", viewCurr);
+        skybox.mesh.render();
+
+        glEnable(GL_CULL_FACE);
+
+        // DONE SETTING UP SKYBOX ---
 
         // Use default shader
         Shader shader = defaultShader;
@@ -141,6 +180,7 @@ public class Renderer {
         GL30.glBindVertexArray(0);
         GL20.glDisableVertexAttribArray(0);
         shader.unuse();
+
     }
 
     private static boolean shouldChunkRender(Chunk chunk, Camera camera) {

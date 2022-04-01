@@ -29,11 +29,11 @@ public class World {
     // Chunks outside this range should be unloaded
     public static float chunkUnloadRange = chunkLoadRange + 128f;
 
-    public Vector3f peakSkyColor = new Vector3f(0.2f, 0.6f, 0.8f);
+    public Vector3f peakSkyColor = new Vector3f(27f/255f, 49f/255f, 61f/255f);
     public Vector3f skyColor;
 
-    public float time = 600f;
-    public float timeRate = 100f;
+    public float time = 300f;
+    public float timeRate = 50f;
 
     public Vector3f select1;
     public Block select1Block;
@@ -325,6 +325,8 @@ public class World {
         skyColorMultiplier = Math.max(skyColorMultiplier, 0.15f);
         skyColor = peakSkyColor.mul((float) skyColorMultiplier, new Vector3f());
 
+        sun.getSkybox().setRotation((float) (Math.PI + 2*Math.PI*(-time/2400)), 0f, 0f);
+
         if (InputController.keyPressed(GLFW_KEY_F)) {
             flying = !flying;
         }
@@ -373,8 +375,6 @@ public class World {
             camera.walkMove(app, dt);
         }
 
-//        sun.setX(camera.position.x);
-//        sun.setZ(camera.position.z);
     }
 
     public void render() {

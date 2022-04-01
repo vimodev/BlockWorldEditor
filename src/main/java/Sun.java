@@ -23,23 +23,25 @@ public class Sun {
     private Matrix4f projection;
 
     private ShadowMap shadowMap;
+    private Skybox skyBox;
 
     public Sun(World world) {
         this.world = world;
         this.directionalLight = new Light(
                 new Vector3f(0f, 0.5f, 0.5f),
-                new Vector3f(0.2f, 0.2f, 0.2f),
-                new Vector3f(0.8f, 0.7f, 0.7f),
-                new Vector3f(0.1f, 0.1f, 0.1f)
+                new Vector3f(0.32f, 0.25f, 0.25f),
+                new Vector3f(0.9f, 0.75f, 0.75f),
+                new Vector3f(0.15f, 0.1f, 0.1f)
         );
 
         this.shadowMap = new ShadowMap();
+        this.skyBox = new Skybox("skybox.obj", "textures/skybox.png");
 
         this.position = new Vector3f();
 
         this.projection = new Matrix4f();
         this.projection.identity();
-        this.projection.setOrtho(-250.0f, 250.0f, -250.0f, 250.00f, -1.0f, 500.0f);
+        this.projection.setOrtho(-250.0f, 250.0f, -250.0f, 250.00f, -1.0f, 1000.0f);
     }
 
     private static float map(float a0, float a1, float b0, float b1, float x) {
@@ -56,11 +58,12 @@ public class Sun {
             this.directionalLight.position = new Vector3f(0f, 1f, 0f);
             this.directionalLight.position.rotateX(y * (float) Math.PI);
             this.directionalLight.position.normalize();
-
-            this.position = new Vector3f(0, 100f, 0);
-            this.position.add(position);
             this.lastUpdate = time;
         }
+        this.position = new Vector3f(0, 0, 0);
+        this.position.add(this.directionalLight.position);
+        this.position.mul(100);
+        this.position.add(position);
     }
 
     public float getTimeMultiplier(float time) {
@@ -91,8 +94,13 @@ public class Sun {
     public Matrix4f getProjection() {
         return this.projection;
     }
+
     public ShadowMap getShadowMap() {
         return this.shadowMap;
+    }
+
+    public Skybox getSkybox() {
+        return this.skyBox;
     }
 
     public Matrix4f getTransformation() {

@@ -34,7 +34,7 @@ public class Camera {
 
     // Settings
     private float mouseSensitivity = 0.2f;
-    private float movementSpeed = 40f;
+    private float movementSpeed = 15f;
     private float strafeSpeed = 10f;
     private float verticalSpeed = 10f;
     private float gravity = -50;
@@ -159,9 +159,9 @@ public class Camera {
         right.cross(up);
 
         velocity = new Vector3f(0);
-        velocity.add(direction.mul(mv_scl_forward * movementSpeed));
-        velocity.add(up.mul(mv_scl_upward * verticalSpeed));
-        velocity.add(right.mul(mv_scl_rightward * strafeSpeed));
+        velocity.add(direction.mul(mv_scl_forward * movementSpeed*3));
+        velocity.add(up.mul(mv_scl_upward * verticalSpeed*3));
+        velocity.add(right.mul(mv_scl_rightward * strafeSpeed*3));
         applyVelocity(dt);
     }
 

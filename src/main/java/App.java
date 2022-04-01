@@ -258,7 +258,7 @@ public class App {
     public void renderUI(World world) {
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
-        int y = 20; int fontSize = 15;
+        int y = 100; int fontSize = 15;
         // Keybinds
         nvgBeginPath(vg);
         nvgFontSize(vg, fontSize);
@@ -266,76 +266,120 @@ public class App {
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
         nvgText(vg, 10, y, "ESC to quit, F to fly, 1/2 for selecting, E to open catalog, ENTER to open command line, type 'help' for commands");
         y += 15;
+
+        // Spacer
+        y += 15;
+        // -- RENDERING
+        nvgBeginPath(vg);
+        nvgFontSize(vg, fontSize);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
+        nvgText(vg, 10, y, "RENDERING");
+        y += 15;
         // FPS counter
         nvgBeginPath(vg);
         nvgFontSize(vg, fontSize);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
-        nvgText(vg, 10, y, "fps: " + String.format("%.0f", fps.getFrequency()));
+        nvgText(vg, 20, y, "FPS: " + String.format("%.0f", fps.getFrequency()));
         y += 15;
         // # Rendered chunks
         nvgBeginPath(vg);
         nvgFontSize(vg, fontSize);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
-        nvgText(vg, 10, y, "#chunks rendered: " + Renderer.numberRendered);
+        nvgText(vg, 20, y, "Chunks rendered: " + Renderer.numberRendered);
         y += 15;
         // # Loaded chunks
         nvgBeginPath(vg);
         nvgFontSize(vg, fontSize);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
-        nvgText(vg, 10, y, "#chunks loaded: " + world.chunks.size());
+        nvgText(vg, 20, y, "Chunks loaded: " + world.chunks.size());
         y += 15;
         // # Chunks currently generating
         nvgBeginPath(vg);
         nvgFontSize(vg, fontSize);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
-        if (world.worldGenerator != null) {
-            nvgText(vg, 10, y, "#chunks loading: " + world.worldGenerator.jobs.size());
-        } else {
-            nvgText(vg, 10, y, "#chunks loading: -");
-        }
+        int nrChunks = (world.worldGenerator != null) ? world.worldGenerator.jobs.size() : 0;
+        nvgText(vg, 20, y, "Chunks loading: " + ((world.worldGenerator != null) ? world.worldGenerator.jobs.size() : "-"));
         y += 15;
         // # lights rendered
         nvgBeginPath(vg);
         nvgFontSize(vg, fontSize);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
-        nvgText(vg, 10, y, "#lights rendered: " + Renderer.lightsRendered);
+        nvgText(vg, 20, y, "Lights rendered: " + Renderer.lightsRendered);
         y += 15;
-        // Camera coordinates
+
+        // Spacer
+        y += 15;
+        // -- WORLD
         nvgBeginPath(vg);
         nvgFontSize(vg, fontSize);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
-        nvgText(vg, 10, y, "pos: " + world.camera.position);
-        y += 15;
-        // Camera dir
-        nvgBeginPath(vg);
-        nvgFontSize(vg, fontSize);
-        nvgFontFace(vg, "sans");
-        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
-        nvgText(vg, 10, y, "dir: " + world.camera.getDirection());
+        nvgText(vg, 10, y, "WORLD");
         y += 15;
         // Time
         nvgBeginPath(vg);
         nvgFontSize(vg, fontSize);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
-        nvgText(vg, 10, y, "time: " + String.format("%.0f (%.0f/s)",  world.time, world.timeRate));
+        nvgText(vg, 20, y, "Time: " + String.format("%.0f (%.0f/s)",  world.time, world.timeRate));
+        y += 15;
+        // Sun position
+        nvgBeginPath(vg);
+        nvgFontSize(vg, fontSize);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
+        nvgText(vg, 20, y, "Sun position: " + String.format("(X:%.1f  Y:%.1f  Z:%.1f)",  world.sun.getPosition().x, world.sun.getPosition().y, world.sun.getPosition().z));
+        y += 15;
+        // Sun direction
+        nvgBeginPath(vg);
+        nvgFontSize(vg, fontSize);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
+        nvgText(vg, 20, y, "Sun direction: " + String.format("(X:%.1f  Y:%.1f  Z:%.1f) (%.2fpi)",  world.sun.getDirection().x, world.sun.getDirection().y, world.sun.getDirection().z, ((world.time/1200f)+1)%2));
+        y += 15;
+        // Darkness
+        nvgBeginPath(vg);
+        nvgFontSize(vg, fontSize);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
+        nvgText(vg, 20, y, "Darkness: " + String.format("%.2f", world.sun.getTimeMultiplier(world.time)));
+        y += 15;
+
+        // Spacer
+        y += 15;
+        // -- CAMERA
+        nvgBeginPath(vg);
+        nvgFontSize(vg, fontSize);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
+        nvgText(vg, 10, y, "PLAYER (CAMERA)");
+        y += 15;
+        // Camera coordinates
+        nvgBeginPath(vg);
+        nvgFontSize(vg, fontSize);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
+        nvgText(vg, 20, y, "Position: " + String.format("(X:%.1f  Y:%.1f  Z:%.1f)",  world.camera.position.x, world.camera.position.y, world.camera.position.z));
+        y += 15;
+        // Camera direction
+        nvgBeginPath(vg);
+        nvgFontSize(vg, fontSize);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
+        nvgText(vg, 20, y, "Direction: " + String.format("(X:%.1f  Y:%.1f  Z:%.1f)",   world.camera.getDirection().x,  world.camera.getDirection().y,  world.camera.getDirection().z));
         y += 15;
         // Selected block type
         nvgBeginPath(vg);
         nvgFontSize(vg, fontSize);
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
-        if (Toolbar.getSelectedBlock() != null) {
-            nvgText(vg, 10, y, "holding block: " + Toolbar.getSelectedBlock().name());
-        } else {
-            nvgText(vg, 10, y, "holding block: ");
-        }
+        nvgText(vg, 20, y, "Currently holding block: " + ((Toolbar.getSelectedBlock() != null) ? Toolbar.getSelectedBlock().name() : "-"));
         y += 15;
 
 

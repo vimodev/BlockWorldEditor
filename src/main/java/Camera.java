@@ -194,7 +194,6 @@ public class Camera {
 
         Vector3f direction = getDirection();
         direction.y = 0;
-        direction.normalize();
         Vector3f up = new Vector3f(0.0f, 1.0f, 0.0f);
         Vector3f right = new Vector3f(direction);
         right.cross(up);

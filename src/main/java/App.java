@@ -7,7 +7,12 @@ import org.lwjgl.nanovg.NVGColor;
 import org.lwjgl.opengl.GL;
 
 import javax.swing.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.FloatBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static java.sql.Types.NULL;
 import static org.lwjgl.nanovg.NanoVG.*;
@@ -116,12 +121,23 @@ public class App {
         contentScaleY = sy.get(0);
 
         String prefix = System.getProperty("user.dir").startsWith("/") ? "/" : "" ;
+        String path = "";
         // Load font
-        String path = this.getClass().getResource("OpenSans-Bold.ttf").getPath().toString().substring(1);
+        try {
+            path = App.resourceToFileSystem("OpenSans-Bold.ttf");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
         font = nvgCreateFont(vg, "sans", prefix + path);
 
         // Load texture img for UI
-        path = this.getClass().getResource("textures.png").getPath().toString().substring(1);
+        try {
+            path = App.resourceToFileSystem("textures.png");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
         textureImg = nvgCreateImage(vg, prefix + path, NVG_IMAGE_NEAREST | NVG_IMAGE_PREMULTIPLIED);
 
         // Initialize command line
@@ -538,6 +554,18 @@ public class App {
             world.select2 = world.camera.position.floor(new Vector3f());
         }
         fps.dt();
+    }
+
+    public static String resourceToFileSystem(String resource) throws IOException {
+        File temp = File.createTempFile("temp", ".temp");
+        Path tempPath = temp.toPath();
+        temp.delete();
+        try (InputStream is = App.class.getResourceAsStream(resource)) {
+            Files.copy(is, tempPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return tempPath.toString();
     }
 
     /**

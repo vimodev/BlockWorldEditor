@@ -1,7 +1,12 @@
 import org.lwjgl.system.MemoryStack;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL12.*;
@@ -10,11 +15,11 @@ import static org.lwjgl.stb.STBImage.*;
 
 public class Texture {
 
-    private final int id;
+    private int id;
 
-    private final int width;
+    private int width;
 
-    private final int height;
+    private int height;
 
     /**
      * Creates an empty texture.
@@ -44,13 +49,16 @@ public class Texture {
             IntBuffer h = stack.mallocInt(1);
             IntBuffer channels = stack.mallocInt(1);
 
-            buf = stbi_load(fileName, w, h, channels, 4);
+            buf = stbi_load(App.resourceToFileSystem(fileName), w, h, channels, 4);
             if (buf == null) {
                 System.out.println("Image file [" + fileName  + "] not loaded: " + stbi_failure_reason());
             }
 
             width = w.get();
             height = h.get();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
         }
 
         this.id = createTexture(buf);

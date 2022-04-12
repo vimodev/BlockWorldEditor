@@ -35,7 +35,7 @@ public class Sun {
         );
 
         this.shadowMap = new ShadowMap();
-        this.skyBox = new Skybox("skybox.obj", "textures/skybox.png");
+        this.skyBox = new Skybox("skybox.obj", "skybox.png");
 
         this.position = new Vector3f();
 

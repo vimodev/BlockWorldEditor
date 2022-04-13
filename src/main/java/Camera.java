@@ -33,7 +33,7 @@ public class Camera {
     public float roll = 0;
 
     // Settings
-    private float mouseSensitivity = 0.2f;
+    private float mouseSensitivity = 0.1f;
     private float movementSpeed = 15f;
     private float strafeSpeed = 10f;
     private float verticalSpeed = 10f;

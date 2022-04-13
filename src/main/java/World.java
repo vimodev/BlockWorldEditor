@@ -32,8 +32,8 @@ public class World {
     public Vector3f peakSkyColor = new Vector3f(27f/255f, 49f/255f, 61f/255f);
     public Vector3f skyColor;
 
-    public float time = 300f;
-    public float timeRate = 50f;
+    public float time = 900f;
+    public float timeRate = 1f;
 
     public Vector3f select1;
     public Block select1Block;

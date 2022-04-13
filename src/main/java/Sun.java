@@ -62,7 +62,7 @@ public class Sun {
         }
         this.position = new Vector3f(0, 0, 0);
         this.position.add(this.directionalLight.position);
-        this.position.mul(100);
+        this.position.mul(200);
         this.position.add(position);
     }
 

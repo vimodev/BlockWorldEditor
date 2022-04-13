@@ -219,6 +219,12 @@ public class App {
                 CommandLine.content = "";
             }
 
+            int step = 5;
+            float difference = Renderer.NEW_RENDER_DISTANCE - Renderer.RENDER_DISTANCE;
+            Renderer.RENDER_DISTANCE += Math.signum(difference) * step;
+            World.chunkLoadRange = Renderer.RENDER_DISTANCE * 1.25f;
+            World.chunkUnloadRange = World.chunkLoadRange + 128f;
+
             if (InputController.keyPressed(GLFW_KEY_E) && !CommandLine.show) {
                 BlockCatalog.show = !BlockCatalog.show;
                 if (BlockCatalog.show) glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -298,6 +304,27 @@ public class App {
         nvgFontFace(vg, "sans");
         nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
         nvgText(vg, 20, y, "FPS: " + String.format("%.0f", fps.getFrequency()));
+        y += 15;
+        // Render distance
+        nvgBeginPath(vg);
+        nvgFontSize(vg, fontSize);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
+        nvgText(vg, 20, y, "Render distance: " + Renderer.RENDER_DISTANCE);
+        y += 15;
+        // Blocks rendered
+        nvgBeginPath(vg);
+        nvgFontSize(vg, fontSize);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
+        nvgText(vg, 20, y, "Blocks rendered: " + Renderer.blocksRendered);
+        y += 15;
+        // Blocks rendered
+        nvgBeginPath(vg);
+        nvgFontSize(vg, fontSize);
+        nvgFontFace(vg, "sans");
+        nvgFillColor(vg, nvgRGBAf(1, 1, 1, 0.5f, NVGColor.create()));
+        nvgText(vg, 20, y, "Vertices rendered: " + Renderer.verticesRendered);
         y += 15;
         // # Rendered chunks
         nvgBeginPath(vg);
@@ -474,9 +501,7 @@ public class App {
                 try {
                     int dist = Integer.parseInt(split[split.length - 1]);
                     if (dist >= 0) {
-                        Renderer.RENDER_DISTANCE = dist;
-                        World.chunkLoadRange = dist * 1.25f;
-                        World.chunkUnloadRange = World.chunkLoadRange + 128f;
+                        Renderer.NEW_RENDER_DISTANCE = dist;
                     }
                 } catch (NumberFormatException e) {};
             }

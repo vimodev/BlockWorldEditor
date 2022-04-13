@@ -20,8 +20,11 @@ public class Renderer {
     public static Shader skyboxShader = new SkyboxShader();
 
     public static float RENDER_DISTANCE = 200f;
+    public static float NEW_RENDER_DISTANCE = RENDER_DISTANCE;
     public static int numberRendered = 0;
-    public static float LIGHT_RENDER_DISTANCE = 50f;
+    public static int verticesRendered = 0;
+    public static int blocksRendered = 0;
+    public static float LIGHT_RENDER_DISTANCE = 200f;
     public static int lightsRendered = 0;
 
     public static void render(World world) {
@@ -58,7 +61,6 @@ public class Renderer {
             // Check if we should render the chunk
             if (!shouldChunkRender(c, world.camera)) continue;
             // Otherwise we render the chunk
-            numberRendered++;
             Matrix4f shadowTransformationViewMatrix = new Matrix4f(world.sun.getTransformation());
             shadowTransformationViewMatrix.mul(c.getTransformationMatrix());
             depthShader.setUniform("shadowTransformationViewMatrix", shadowTransformationViewMatrix);
@@ -156,6 +158,8 @@ public class Renderer {
 
         // Render each chunk's mesh
         numberRendered = 0;
+        verticesRendered = 0;
+        blocksRendered = 0;
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, world.sun.getShadowMap().getDepthMapTexture().getId());
         for (Chunk c : world.chunks) {
@@ -164,6 +168,8 @@ public class Renderer {
             if (!c.meshReady) c.loadCalculatedMesh();
             // Otherwise we render the chunk
             numberRendered++;
+            verticesRendered+=c.vertexCount;
+            blocksRendered+=c.blockList.size();
             shader.setUniform("transformationMatrix", c.getTransformationMatrix());
             // Set depth/shadow matrix
             Matrix4f shadowTransformationViewMatrix = new Matrix4f(world.sun.getTransformation());
